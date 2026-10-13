@@ -1,0 +1,28 @@
+[workspace]
+members = [
+    "app_info",
+]
+resolver = "2"
+
+[workspace.package]
+description = "Octave Up-Down"
+license = "MIT or Apache-2.0"
+version = "0.1.0"
+
+[package]
+name = "octave-up-down"
+description.workspace = true
+license.workspace = true
+version.workspace = true
+authors = ["Simon O'Rorke"]
+edition = "2024"
+build = "build.rs"
+
+[dependencies]
+app_info = { path = "app_info" }
+env_logger = "0.11.11"
+log = "0.4.34"
+slint = "1.18.1"
+
+[build-dependencies]
+slint-build = "1.18.1"

@@ -20,6 +20,10 @@ build = "build.rs"
 
 [dependencies]
 app_info = { path = "app_info" }
+simonor = { path = "../simonor" }
+# Once simonor is stable and pushed to remote Git, update the dependency to point
+# to its Git repo:
+# simonor = { git = "https://github.com/SimonORorke/simonor.git", branch = "main" }
 env_logger = "0.11.11"
 log = "0.4.34"
 slint = "1.18.1"

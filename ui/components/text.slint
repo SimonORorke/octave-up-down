@@ -1,0 +1,46 @@
+import { Palette } from "std-widgets.slint";
+import { UText, } from "@sleek-ui/widgets.slint";
+import { Globals } from "../globals.slint";
+//import { Catppuccin, CatppuccinPalette } from "../styling.slint";
+
+export enum SlintMessageType {
+    Error,
+    Info,
+    Highlight,
+    Warning
+}
+
+export component MessageText inherits MagicText {
+    in property <SlintMessageType> message_type;
+
+    color: get_color();
+    wrap: TextWrap.word-wrap;
+
+    function get_color() -> color {
+        let catppuccin_palette = Palette.color_scheme == ColorScheme.light
+            ? Catppuccin.latte
+            : Catppuccin.macchiato;
+        if (root.message_type == SlintMessageType.Error) {
+            return catppuccin_palette.red;
+        } else if (root.message_type == SlintMessageType.Info) {
+            return catppuccin_palette.blue;
+        } else if (root.message_type == SlintMessageType.Highlight) {
+            return catppuccin_palette.green;
+        } else { // Warning
+            return catppuccin_palette.peach;
+        }
+    }
+}
+
+export component ParamName inherits MagicText {
+    width: Globals.param_width;
+    horizontal_alignment: center;
+    vertical_alignment: center;
+}
+
+export component ParamValue inherits MessageText {
+    width: Globals.param_width;
+    horizontal_alignment: center;
+    vertical_alignment: top;
+    message_type: SlintMessageType.Highlight;
+}

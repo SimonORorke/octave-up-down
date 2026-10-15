@@ -117,6 +117,18 @@ The junction directory is listed in `.gitignore` so it is never committed:
 
 The script `make_junction.js` **is** committed to the repository so collaborators can run it.
 
+## Ui Subdirectories in Project
+
+In each subdirectory of the project's `ui` directory that contains Slint files referenceing `@sleek-ui`,
+
+1. Create a shortcut to the junction directory.
+2. Add the shortcut to `.gitignore` so it is never committed::
+
+```
+/ui/@sleek-ui
+/ui/components/@sleek-ui.lnk
+```
+
 ## Slint Live-Preview: Additional Requirement
 
 Slint Live-Preview (in the RustRover Slint plugin) only has access to files that are currently

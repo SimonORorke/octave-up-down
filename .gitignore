@@ -13,4 +13,4 @@
 # NTFS directory junction created by make_junction.js for the Slint LSP / Live-Preview to
 # resolve @sleek-ui imports. See docs/slint-lsp-sleek-ui-setup.md.
 /ui/@sleek-ui
-/ui/components/@sleek-ui.lnk
+/ui/**/@sleek-ui

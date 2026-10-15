@@ -1,11 +1,13 @@
 import { UText, UButton } from "@sleek-ui/widgets.slint";
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
+import { Globals } from "globals.slint";
 
 // As of Slint 18.1 and sleek-ui 1.6.0, Show Preview does not work.
 export component MainWindow inherits Window {
 	width: 400px;
 	height: 500px;
     title: window_title;
+    icon: Globals.icon;
 
     in property <string> window_title;
 	in-out property <int> counter: 0;

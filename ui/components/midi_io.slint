@@ -1,0 +1,167 @@
+import {
+    UButton,
+    UCard,
+    USelect,
+    UText,
+} from "@sleek-ui/widgets.slint";
+import { UButtonVariant } from "@sleek-ui/common.slint";
+import { UAppTheme } from "@sleek-ui/app-theme.slint";
+import { MessageText, SlintMessageType } from "text.slint";
+import { VerticalBox } from "std-widgets.slint";
+import { Globals } from "../globals.slint";
+
+export component MidiIo inherits UCard {
+    background: UAppTheme.primary.selected;
+    width: 680px;
+
+    in property <string> title;
+
+    in-out property input_devices_options <=> input_devices_select.options;
+    in-out property <int> input_selected_device_index;
+    callback input_connect_device();
+    callback input_refresh_devices();
+    public function input_focus() {
+        input_devices_select.set_focus();
+    }
+    public function input_show_connected_device_name(name: string, message_type: SlintMessageType) {
+        input_connected_device_name_text.text = name;
+        input_connected_device_name_text.message_type = message_type;
+    }
+
+    in-out property output_devices_options <=> output_devices_select.options;
+    in-out property <int> output_selected_device_index;
+    callback output_connect_device();
+    callback output_refresh_devices();
+    public function output_focus() {
+        output_devices_select.set_focus();
+    }
+    public function output_show_connected_device_name(name: string, message_type: SlintMessageType) {
+        output_connected_device_name_text.text = name;
+        output_connected_device_name_text.message_type = message_type;
+    }
+    VerticalLayout {
+        spacing: 10px;
+        padding: 10px;
+        title_layout := VerticalLayout {
+            title_text := UText {
+                text: root.title;
+            }
+        }
+        padding_top: 10px;
+        HorizontalLayout {
+            UText {
+                text: "MIDI Input";
+                vertical_alignment: center;
+            }
+            VerticalLayout {
+                padding_left: Globals.horizontal_padding;
+                padding_right: Globals.horizontal_padding * 2;
+                input_devices_select := USelect {
+                    current_index: root.input_selected_device_index;
+                    changed current_index => {
+                        root.input_selected_device_index = self.current_index;
+                    }
+                    height: Globals.control_height;
+                    width: 395px;
+                }
+            }
+            VerticalLayout {
+                UButton {
+                    text: "Connect";
+                    variant: UButtonVariant.primary;
+                    clicked => {
+                        root.input_connect_device()
+                    }
+                    height: Globals.control_height;
+                    width: Globals.button_width;
+                }
+            }
+        }
+        GridLayout {
+            VerticalLayout {
+                col: 0;
+                UText {
+                    text: "Connected: ";
+                    horizontal_alignment: left;
+                    vertical_alignment: center;
+                }
+            }
+            VerticalLayout {
+                col: 1;
+                input_connected_device_name_text := MessageText {
+                    horizontal_alignment: left;
+                    vertical_alignment: center;
+                }
+            }
+            VerticalLayout {
+                col: 2;
+                UButton {
+                    text: "Refresh Devices";
+                    clicked => {
+                        root.input_refresh_devices()
+                    }
+                    height: Globals.control_height;
+                    width: 160px;
+                }
+            }
+        }
+        HorizontalLayout {
+            padding_top: 20px;
+            UText {
+                text: "MIDI Output";
+                vertical_alignment: center;
+            }
+            VerticalLayout {
+                padding_left: Globals.horizontal_padding;
+                padding_right: Globals.horizontal_padding * 2;
+                output_devices_select := USelect {
+                    current_index: root.output_selected_device_index;
+                    changed current_index => {
+                        root.output_selected_device_index = self.current_index;
+                    }
+                    height: Globals.control_height;
+                    width: 395px;
+                }
+            }
+            VerticalLayout {
+                UButton {
+                    text: "Connect";
+                    variant: UButtonVariant.primary;
+                    clicked => {
+                        root.output_connect_device()
+                    }
+                    height: Globals.control_height;
+                    width: Globals.button_width;
+                }
+            }
+        }
+        GridLayout {
+            VerticalLayout {
+                col: 0;
+                UText {
+                    text: "Connected: ";
+                    horizontal_alignment: left;
+                    vertical_alignment: center;
+                }
+            }
+            VerticalLayout {
+                col: 1;
+                output_connected_device_name_text := MessageText {
+                    horizontal_alignment: left;
+                    vertical_alignment: center;
+                }
+            }
+            VerticalLayout {
+                col: 2;
+                UButton {
+                    text: "Refresh Devices";
+                    clicked => {
+                        root.output_refresh_devices()
+                    }
+                    height: Globals.control_height;
+                    width: 160px;
+                }
+            }
+        }
+    }
+}

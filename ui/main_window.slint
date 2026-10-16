@@ -1,53 +1,72 @@
+import { Palette, VerticalBox, } from "std-widgets.slint";
 import { UText, UButton } from "@sleek-ui/widgets.slint";
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
 import { Globals } from "globals.slint";
+import { MessageText, SlintMessageType, ParamName, ParamValue } from "components/text.slint";
+import { MidiIo } from "components/midi_io.slint";
+
+export enum SlintDeviceType {
+    input,
+    output
+}
 
 // As of Slint 18.1 and sleek-ui 1.6.0, Show Preview does not work.
 export component MainWindow inherits Window {
-	width: 400px;
-	height: 500px;
+    init => {
+        Palette.color-scheme = ColorScheme.dark;
+        UAppTheme.dark.primary = UAppTheme.calendula-gold;
+//        UAppTheme.dark.primary = UAppTheme.golden-purple;
+        UAppTheme.dark.radius-base = 20px;
+    }
+    preferred_width: 700px;
+    preferred_height: 480px;
     title: window_title;
     icon: Globals.icon;
 
     in property <string> window_title;
-	in-out property <int> counter: 0;
+    
+    callback connect_device(device_type: SlintDeviceType);
+    callback refresh_devices(device_type: SlintDeviceType);
+
+    in-out property input_devices_options <=> midi_io.input_devices_options;
+    in-out property <int> input_selected_device_index <=> midi_io.input_selected_device_index;
+    public function input_focus() {
+        midi_io.input_focus();
+    }
+    public function input_show_connected_device_name(name: string, message_type: SlintMessageType) {
+        midi_io.input_show_connected_device_name(name, message_type);
+    }
+
+    in-out property output_devices_options <=> midi_io.output_devices_options;
+    in-out property <int> output_selected_device_index <=> midi_io.output_selected_device_index;
+    public function output_focus() {
+        midi_io.output_focus();
+    }
+    public function output_show_connected_device_name(name: string, message_type: SlintMessageType) {
+        midi_io.output_show_connected_device_name(name, message_type);
+    }
 
 	VerticalLayout {
-		alignment: center;
-
-		HorizontalLayout {
-			alignment: center;
-			UText {
-				text: "Counter: \{counter}";
-			}
-		}
-
-		HorizontalLayout {
-			alignment: center;
-			spacing: UAppTheme.spacing-base;
-			UButton {
-				variant: primary;
-				text: "Decrement";
-				clicked => {
-					root.counter -= 1;
-				}
-			}
-
-			UButton {
-				text: "Reset";
-				clicked => {
-					root.counter = 0;
-				}
-			}
-
-			UButton {
-				variant: primary;
-				danger: true;
-				text: "increment";
-				clicked => {
-					root.counter += 1;
-				}
-			}
-		}
+        alignment: start; // Stops spreading out when window lenghthened.
+        padding_left: 10px;
+        padding_right: 10px;
+        midi_io_layout := VerticalLayout {
+            padding_top: 10px;
+            midi_io := MidiIo {
+                title: "MIDI Devices";
+                input_connect_device => {
+                    root.connect_device(SlintDeviceType.input)
+                }
+                output_connect_device => {
+                    root.connect_device(SlintDeviceType.output)
+                }
+                input_refresh_devices => {
+                    root.refresh_devices(SlintDeviceType.input)
+                }
+                output_refresh_devices => {
+                    root.refresh_devices(SlintDeviceType.output)
+                }
+            }
+        }
 	}
 }

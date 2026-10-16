@@ -1,5 +1,5 @@
 import { Palette } from "std-widgets.slint";
-import { UText, } from "@sleek-ui/widgets.slint";
+import { UText } from "@sleek-ui/widgets.slint";
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
 import { Globals } from "../globals.slint";
 
@@ -18,26 +18,26 @@ export component MessageText inherits UText {
 
     function get_color() -> color {
         if (root.message_type == SlintMessageType.Error) {
-            return UAppTheme.dust-red;
+            return UAppTheme.dust-red.base;
         } else if (root.message_type == SlintMessageType.Info) {
-            return UAppTheme.geek-blue;
+            return UAppTheme.geek-blue.base;
         } else if (root.message_type == SlintMessageType.Highlight) {
-            return UAppTheme.polar-green;
+            return UAppTheme.polar-green.base;
         } else { // Warning
-            return UAppTheme.sunset-orange;
+            return UAppTheme.sunset-orange.base;
         }
     }
 }
 
-//export component ParamName inherits MagicText {
-//    width: Globals.param_width;
-//    horizontal_alignment: center;
-//    vertical_alignment: center;
-//}
-//
-//export component ParamValue inherits MessageText {
-//    width: Globals.param_width;
-//    horizontal_alignment: center;
-//    vertical_alignment: top;
-//    message_type: SlintMessageType.Highlight;
-//}
+export component ParamName inherits UText {
+    width: Globals.param_width;
+    horizontal_alignment: center;
+    vertical_alignment: center;
+}
+
+export component ParamValue inherits MessageText {
+    width: Globals.param_width;
+    horizontal_alignment: center;
+    vertical_alignment: top;
+    message_type: SlintMessageType.Highlight;
+}

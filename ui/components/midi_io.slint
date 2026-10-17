@@ -16,57 +16,57 @@ export component MidiIo inherits UCard {
 
     in property <string> title;
 
-    in-out property input_devices_options <=> input_devices_select.options;
-    in-out property <int> input_selected_device_index;
-    callback input_connect_device();
-    callback input_refresh_devices();
-    public function input_focus() {
-        input_devices_select.set_focus();
+    in-out property input-devices-options <=> input-devices-select.options;
+    in-out property <int> input-selected-device-index;
+    callback input-connect-device();
+    callback input-refresh-devices();
+    public function input-focus() {
+        input-devices-select.set-focus();
     }
-    public function input_show_connected_device_name(name: string, message_type: SlintMessageType) {
-        input_connected_device_name_text.text = name;
-        input_connected_device_name_text.message_type = message_type;
+    public function input-show-connected-device-name(name: string, message-type: SlintMessageType) {
+        input-connected-device-name-text.text = name;
+        input-connected-device-name-text.message-type = message-type;
     }
 
-    in-out property output_devices_options <=> output_devices_select.options;
-    in-out property <int> output_selected_device_index;
-    callback output_connect_device();
-    callback output_refresh_devices();
-    public function output_focus() {
-        output_devices_select.set_focus();
+    in-out property output-devices-options <=> output-devices-select.options;
+    in-out property <int> output-selected-device-index;
+    callback output-connect-device();
+    callback output-refresh-devices();
+    public function output-focus() {
+        output-devices-select.set-focus();
     }
-    public function output_show_connected_device_name(name: string, message_type: SlintMessageType) {
-        output_connected_device_name_text.text = name;
-        output_connected_device_name_text.message_type = message_type;
+    public function output-show-connected-device-name(name: string, message-type: SlintMessageType) {
+        output-connected-device-name-text.text = name;
+        output-connected-device-name-text.message-type = message-type;
     }
     VerticalLayout {
         spacing: 10px;
         padding: 10px;
-        title_layout := VerticalLayout {
-            title_text := UText {
+        title-layout := VerticalLayout {
+            title-text := UText {
                 text: root.title;
                 // Lightest against the dark "selected" background
                 color: UAppTheme.primary.hover;
-                font_size: UAppTheme.font_size_medium;
+                font-size: UAppTheme.font-size-medium;
                 font-italic: true;
-//                font_weight: FontWeight.bold;
+//                font-weight: FontWeight.bold;
             }
         }
-        padding_top: 10px;
+        padding-top: 10px;
         HorizontalLayout {
             UText {
                 text: "MIDI Input";
-                vertical_alignment: center;
+                vertical-alignment: center;
             }
             VerticalLayout {
-                padding_left: Globals.horizontal_padding;
-                padding_right: Globals.horizontal_padding * 2;
-                input_devices_select := USelect {
-                    current_index: root.input_selected_device_index;
-                    changed current_index => {
-                        root.input_selected_device_index = self.current_index;
+                padding-left: Globals.horizontal-padding;
+                padding-right: Globals.horizontal-padding * 2;
+                input-devices-select := USelect {
+                    current-index: root.input-selected-device-index;
+                    changed current-index => {
+                        root.input-selected-device-index = self.current-index;
                     }
-                    height: Globals.control_height;
+                    height: Globals.control-height;
                     width: 395px;
                 }
             }
@@ -75,10 +75,10 @@ export component MidiIo inherits UCard {
                     text: "Connect";
                     variant: UButtonVariant.primary;
                     clicked => {
-                        root.input_connect_device()
+                        root.input-connect-device()
                     }
-                    height: Globals.control_height;
-                    width: Globals.button_width;
+                    height: Globals.control-height;
+                    width: Globals.button-width;
                 }
             }
         }
@@ -87,15 +87,15 @@ export component MidiIo inherits UCard {
                 col: 0;
                 UText {
                     text: "Connected: ";
-                    horizontal_alignment: left;
-                    vertical_alignment: center;
+                    horizontal-alignment: left;
+                    vertical-alignment: center;
                 }
             }
             VerticalLayout {
                 col: 1;
-                input_connected_device_name_text := MessageText {
-                    horizontal_alignment: left;
-                    vertical_alignment: center;
+                input-connected-device-name-text := MessageText {
+                    horizontal-alignment: left;
+                    vertical-alignment: center;
                 }
             }
             VerticalLayout {
@@ -103,28 +103,28 @@ export component MidiIo inherits UCard {
                 UButton {
                     text: "Refresh Devices";
                     clicked => {
-                        root.input_refresh_devices()
+                        root.input-refresh-devices()
                     }
-                    height: Globals.control_height;
+                    height: Globals.control-height;
                     width: 160px;
                 }
             }
         }
         HorizontalLayout {
-            padding_top: 20px;
+            padding-top: 20px;
             UText {
                 text: "MIDI Output";
-                vertical_alignment: center;
+                vertical-alignment: center;
             }
             VerticalLayout {
-                padding_left: Globals.horizontal_padding;
-                padding_right: Globals.horizontal_padding * 2;
-                output_devices_select := USelect {
-                    current_index: root.output_selected_device_index;
-                    changed current_index => {
-                        root.output_selected_device_index = self.current_index;
+                padding-left: Globals.horizontal-padding;
+                padding-right: Globals.horizontal-padding * 2;
+                output-devices-select := USelect {
+                    current-index: root.output-selected-device-index;
+                    changed current-index => {
+                        root.output-selected-device-index = self.current-index;
                     }
-                    height: Globals.control_height;
+                    height: Globals.control-height;
                     width: 395px;
                 }
             }
@@ -133,10 +133,10 @@ export component MidiIo inherits UCard {
                     text: "Connect";
                     variant: UButtonVariant.primary;
                     clicked => {
-                        root.output_connect_device()
+                        root.output-connect-device()
                     }
-                    height: Globals.control_height;
-                    width: Globals.button_width;
+                    height: Globals.control-height;
+                    width: Globals.button-width;
                 }
             }
         }
@@ -145,15 +145,15 @@ export component MidiIo inherits UCard {
                 col: 0;
                 UText {
                     text: "Connected: ";
-                    horizontal_alignment: left;
-                    vertical_alignment: center;
+                    horizontal-alignment: left;
+                    vertical-alignment: center;
                 }
             }
             VerticalLayout {
                 col: 1;
-                output_connected_device_name_text := MessageText {
-                    horizontal_alignment: left;
-                    vertical_alignment: center;
+                output-connected-device-name-text := MessageText {
+                    horizontal-alignment: left;
+                    vertical-alignment: center;
                 }
             }
             VerticalLayout {
@@ -161,9 +161,9 @@ export component MidiIo inherits UCard {
                 UButton {
                     text: "Refresh Devices";
                     clicked => {
-                        root.output_refresh_devices()
+                        root.output-refresh-devices()
                     }
-                    height: Globals.control_height;
+                    height: Globals.control-height;
                     width: 160px;
                 }
             }

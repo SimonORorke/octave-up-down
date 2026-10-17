@@ -25,77 +25,77 @@ export component MainWindow inherits Window {
         UAppTheme.dark.primary = UAppTheme.lime;
         UAppTheme.dark.radius-base = 20px;
     }
-    preferred_width: 700px;
-    preferred_height: 480px;
-    title: window_title;
+    preferred-width: 700px;
+    preferred-height: 480px;
+    title: window-title;
     icon: Globals.icon;
 
-    in property <string> window_title;
+    in property <string> window-title;
     
-    callback connect_device(device_type: SlintDeviceType);
-    callback refresh_devices(device_type: SlintDeviceType);
+    callback connect-device(device-type: SlintDeviceType);
+    callback refresh-devices(device-type: SlintDeviceType);
 
-    public function show_message(message: string, message_type: SlintMessageType) {
-        message_text.text = message;
-        message_text.message_type = message_type;
-    }
-
-    in-out property input_devices_options <=> midi_io.input_devices_options;
-    in-out property <int> input_selected_device_index <=> midi_io.input_selected_device_index;
-    public function input_focus() {
-        midi_io.input_focus();
-    }
-    public function input_show_connected_device_name(name: string, message_type: SlintMessageType) {
-        midi_io.input_show_connected_device_name(name, message_type);
+    public function show-message(message: string, message-type: SlintMessageType) {
+        message-text.text = message;
+        message-text.message-type = message-type;
     }
 
-    in-out property output_devices_options <=> midi_io.output_devices_options;
-    in-out property <int> output_selected_device_index <=> midi_io.output_selected_device_index;
-    public function output_focus() {
-        midi_io.output_focus();
+    in-out property input-devices-options <=> midi-io.input-devices-options;
+    in-out property <int> input-selected-device-index <=> midi-io.input-selected-device-index;
+    public function input-focus() {
+        midi-io.input-focus();
     }
-    public function output_show_connected_device_name(name: string, message_type: SlintMessageType) {
-        midi_io.output_show_connected_device_name(name, message_type);
+    public function input-show-connected-device-name(name: string, message-type: SlintMessageType) {
+        midi-io.input-show-connected-device-name(name, message-type);
+    }
+
+    in-out property output-devices-options <=> midi-io.output-devices-options;
+    in-out property <int> output-selected-device-index <=> midi-io.output-selected-device-index;
+    public function output-focus() {
+        midi-io.output-focus();
+    }
+    public function output-show-connected-device-name(name: string, message-type: SlintMessageType) {
+        midi-io.output-show-connected-device-name(name, message-type);
     }
 
 	VerticalLayout {
         alignment: start; // Stops spreading out when window lenghthened.
-        padding_left: 10px;
-        padding_right: 10px;
-        midi_io_layout := VerticalLayout {
-            padding_top: 10px;
-            midi_io := MidiIo {
+        padding-left: 10px;
+        padding-right: 10px;
+        midi-io-layout := VerticalLayout {
+            padding-top: 10px;
+            midi-io := MidiIo {
                 title: "MIDI Devices";
-                input_connect_device => {
-                    root.connect_device(SlintDeviceType.input)
+                input-connect-device => {
+                    root.connect-device(SlintDeviceType.input)
                 }
-                output_connect_device => {
-                    root.connect_device(SlintDeviceType.output)
+                output-connect-device => {
+                    root.connect-device(SlintDeviceType.output)
                 }
-                input_refresh_devices => {
-                    root.refresh_devices(SlintDeviceType.input)
+                input-refresh-devices => {
+                    root.refresh-devices(SlintDeviceType.input)
                 }
-                output_refresh_devices => {
-                    root.refresh_devices(SlintDeviceType.output)
+                output-refresh-devices => {
+                    root.refresh-devices(SlintDeviceType.output)
                 }
             }
         }
-        status_bar_layout := HorizontalLayout {
-            padding_top: 5px;
-            icon_layout := HorizontalLayout {
-                padding_top: 10px;
+        status-bar-layout := HorizontalLayout {
+            padding-top: 5px;
+            icon-layout := HorizontalLayout {
+                padding-top: 10px;
                 Image {
                     source: Globals.icon;
-                    width:  Globals.control_height; height: Globals.control_height;
+                    width:  Globals.control-height; height: Globals.control-height;
                 }
             }
-            status_message_box := VerticalBox {
+            status-message-box := VerticalBox {
                 padding-top: 15px;
                 alignment: start;
-                message_text := MessageText {
+                message-text := MessageText {
 //                    text: "Radbod, King of the Frisians, is such a rad bod!";
 //                    text: "Radbod, King of the Frisians, is such a rad bod! Radbod, King of the Frisians, is such a rad bod!";
-                    horizontal_alignment: center;
+                    horizontal-alignment: center;
                 }
             }
         }

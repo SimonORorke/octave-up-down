@@ -11,17 +11,17 @@ export enum SlintMessageType {
 }
 
 export component MessageText inherits UText {
-    in property <SlintMessageType> message_type;
+    in property <SlintMessageType> message-type;
 
-    color: get_color();
+    color: get-color();
     wrap: TextWrap.word-wrap;
 
-    function get_color() -> color {
-        if (root.message_type == SlintMessageType.Error) {
+    function get-color() -> color {
+        if (root.message-type == SlintMessageType.Error) {
             return UAppTheme.dust-red.base;
-        } else if (root.message_type == SlintMessageType.Info) {
+        } else if (root.message-type == SlintMessageType.Info) {
             return UAppTheme.geek-blue.base;
-        } else if (root.message_type == SlintMessageType.Highlight) {
+        } else if (root.message-type == SlintMessageType.Highlight) {
             return UAppTheme.polar-green.base;
         } else { // Warning
             return UAppTheme.sunset-orange.base;
@@ -30,14 +30,14 @@ export component MessageText inherits UText {
 }
 
 export component ParamName inherits UText {
-    width: Globals.param_width;
-    horizontal_alignment: center;
-    vertical_alignment: center;
+    width: Globals.param-width;
+    horizontal-alignment: center;
+    vertical-alignment: center;
 }
 
 export component ParamValue inherits MessageText {
-    width: Globals.param_width;
-    horizontal_alignment: center;
-    vertical_alignment: top;
-    message_type: SlintMessageType.Highlight;
+    width: Globals.param-width;
+    horizontal-alignment: center;
+    vertical-alignment: top;
+    message-type: SlintMessageType.Highlight;
 }

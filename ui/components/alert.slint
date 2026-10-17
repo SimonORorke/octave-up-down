@@ -1,0 +1,21 @@
+import { UAlert } from "@sleek-ui/widgets.slint";
+import { UVariantType } from "@sleek-ui/common.slint";
+import { SlintMessageType } from "../globals.slint";
+
+export component Alert inherits UAlert {
+    in property <SlintMessageType> message-type;
+
+    variant: get-variant();
+
+    function get-variant() -> UVariantType {
+        if (root.message-type == SlintMessageType.Error) {
+            return UVariantType.error;
+        } else if (root.message-type == SlintMessageType.Info) {
+            return UVariantType.info;
+        } else if (root.message-type == SlintMessageType.Success) {
+            return UVariantType.success;
+        } else { // Warning
+            return UVariantType.warning;
+        }
+    }
+}

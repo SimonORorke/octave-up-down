@@ -6,13 +6,13 @@ import {
 } from "@sleek-ui/widgets.slint";
 import { UButtonVariant } from "@sleek-ui/common.slint";
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
-import { MessageText, SlintMessageType } from "text.slint";
+import { MessageText } from "text.slint";
 import { VerticalBox } from "std-widgets.slint";
-import { Globals } from "../globals.slint";
+import { Globals, SlintMessageType } from "../globals.slint";
 
 export component MidiIo inherits UCard {
     background: UAppTheme.primary.selected; // Darkest
-    width: 680px;
+    width: 686px;
 
     in property <string> title;
 
@@ -40,8 +40,8 @@ export component MidiIo inherits UCard {
         output-connected-device-name-text.message-type = message-type;
     }
     VerticalLayout {
-        spacing: 10px;
-        padding: 10px;
+        spacing: UAppTheme.spacing-medium;
+        padding: UAppTheme.padding-medium;
         title-layout := VerticalLayout {
             title-text := UText {
                 text: root.title;
@@ -49,25 +49,24 @@ export component MidiIo inherits UCard {
                 color: UAppTheme.primary.hover;
                 font-size: UAppTheme.font-size-medium;
                 font-italic: true;
-//                font-weight: FontWeight.bold;
             }
         }
-        padding-top: 10px;
+        padding-top: UAppTheme.padding-medium;
         HorizontalLayout {
             UText {
                 text: "MIDI Input";
                 vertical-alignment: center;
             }
             VerticalLayout {
-                padding-left: Globals.horizontal-padding;
-                padding-right: Globals.horizontal-padding * 2;
+                padding-left: UAppTheme.padding-base;
+                padding-right: UAppTheme.padding-medium;
                 input-devices-select := USelect {
                     current-index: root.input-selected-device-index;
                     changed current-index => {
                         root.input-selected-device-index = self.current-index;
                     }
                     height: Globals.control-height;
-                    width: 395px;
+                    width: 420px;
                 }
             }
             VerticalLayout {
@@ -111,21 +110,21 @@ export component MidiIo inherits UCard {
             }
         }
         HorizontalLayout {
-            padding-top: 20px;
+        padding-top: UAppTheme.padding-bigger;
             UText {
                 text: "MIDI Output";
                 vertical-alignment: center;
             }
             VerticalLayout {
-                padding-left: Globals.horizontal-padding;
-                padding-right: Globals.horizontal-padding * 2;
+                padding-left: UAppTheme.padding-base;
+                padding-right: UAppTheme.padding-medium;
                 output-devices-select := USelect {
                     current-index: root.output-selected-device-index;
                     changed current-index => {
                         root.output-selected-device-index = self.current-index;
                     }
                     height: Globals.control-height;
-                    width: 395px;
+                    width: 420px;
                 }
             }
             VerticalLayout {

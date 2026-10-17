@@ -1,8 +1,8 @@
 import { Palette, VerticalBox, } from "std-widgets.slint";
 import { UText, UButton } from "@sleek-ui/widgets.slint";
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
-import { Globals } from "globals.slint";
-import { MessageText, SlintMessageType, ParamName, ParamValue } from "components/text.slint";
+import { Globals, SlintMessageType } from "globals.slint";
+import { Alert } from "components/alert.slint";
 import { MidiIo } from "components/midi_io.slint";
 
 export enum SlintDeviceType {
@@ -25,7 +25,7 @@ export component MainWindow inherits Window {
         UAppTheme.dark.primary = UAppTheme.lime;
         UAppTheme.dark.radius-base = 20px;
     }
-    preferred-width: 700px;
+    min-width: 700px;
     preferred-height: 480px;
     title: window-title;
     icon: Globals.icon;
@@ -36,8 +36,8 @@ export component MainWindow inherits Window {
     callback refresh-devices(device-type: SlintDeviceType);
 
     public function show-message(message: string, message-type: SlintMessageType) {
-        message-text.text = message;
-        message-text.message-type = message-type;
+        alert.message = @markdown("\\{message}");
+        alert.message-type = message-type;
     }
 
     in-out property input-devices-options <=> midi-io.input-devices-options;
@@ -60,10 +60,9 @@ export component MainWindow inherits Window {
 
 	VerticalLayout {
         alignment: start; // Stops spreading out when window lenghthened.
-        padding-left: 10px;
-        padding-right: 10px;
+        padding-left: UAppTheme.padding-medium;
         midi-io-layout := VerticalLayout {
-            padding-top: 10px;
+            padding-top: UAppTheme.padding-medium;
             midi-io := MidiIo {
                 title: "MIDI Devices";
                 input-connect-device => {
@@ -81,21 +80,16 @@ export component MainWindow inherits Window {
             }
         }
         status-bar-layout := HorizontalLayout {
-            padding-top: 5px;
             icon-layout := HorizontalLayout {
-                padding-top: 10px;
+                padding-top: UAppTheme.padding-medium;
                 Image {
                     source: Globals.icon;
-                    width:  Globals.control-height; height: Globals.control-height;
+                    width: 40px; height: 40px;
                 }
             }
             status-message-box := VerticalBox {
-                padding-top: 15px;
-                alignment: start;
-                message-text := MessageText {
-//                    text: "Radbod, King of the Frisians, is such a rad bod!";
-//                    text: "Radbod, King of the Frisians, is such a rad bod! Radbod, King of the Frisians, is such a rad bod!";
-                    horizontal-alignment: center;
+                alert := Alert {
+                    message: @markdown("Radbod, King of the Frisians, is such a rad bod!");
                 }
             }
         }

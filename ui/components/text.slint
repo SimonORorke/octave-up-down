@@ -1,14 +1,6 @@
-import { Palette } from "std-widgets.slint";
 import { UText } from "@sleek-ui/widgets.slint";
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
-import { Globals } from "../globals.slint";
-
-export enum SlintMessageType {
-    Error,
-    Info,
-    Highlight,
-    Warning
-}
+import { SlintMessageType } from "../globals.slint";
 
 export component MessageText inherits UText {
     in property <SlintMessageType> message-type;
@@ -21,23 +13,10 @@ export component MessageText inherits UText {
             return UAppTheme.dust-red.base;
         } else if (root.message-type == SlintMessageType.Info) {
             return UAppTheme.geek-blue.base;
-        } else if (root.message-type == SlintMessageType.Highlight) {
+        } else if (root.message-type == SlintMessageType.Success) {
             return UAppTheme.polar-green.base;
         } else { // Warning
             return UAppTheme.sunset-orange.base;
         }
     }
-}
-
-export component ParamName inherits UText {
-    width: Globals.param-width;
-    horizontal-alignment: center;
-    vertical-alignment: center;
-}
-
-export component ParamValue inherits MessageText {
-    width: Globals.param-width;
-    horizontal-alignment: center;
-    vertical-alignment: top;
-    message-type: SlintMessageType.Highlight;
 }

@@ -16,7 +16,7 @@ export component MidiIo inherits UCard {
 
     in property <string> title;
 
-    in-out property input-devices-options <=> input-devices-select.options;
+    in-out property input-devices-model <=> input-devices-select.options;
     in-out property <int> input-selected-device-index;
     callback input-connect-device();
     callback input-refresh-devices();
@@ -28,7 +28,7 @@ export component MidiIo inherits UCard {
         input-connected-device-name-text.message-type = message-type;
     }
 
-    in-out property output-devices-options <=> output-devices-select.options;
+    in-out property output-devices-model <=> output-devices-select.options;
     in-out property <int> output-selected-device-index;
     callback output-connect-device();
     callback output-refresh-devices();

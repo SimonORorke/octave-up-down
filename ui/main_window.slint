@@ -40,7 +40,7 @@ export component MainWindow inherits Window {
         alert.message-type = message-type;
     }
 
-    in-out property input-devices-options <=> midi-io.input-devices-options;
+    in-out property input-devices-model <=> midi-io.input-devices-model;
     in-out property <int> input-selected-device-index <=> midi-io.input-selected-device-index;
     public function input-focus() {
         midi-io.input-focus();
@@ -49,7 +49,7 @@ export component MainWindow inherits Window {
         midi-io.input-show-connected-device-name(name, message-type);
     }
 
-    in-out property output-devices-options <=> midi-io.output-devices-options;
+    in-out property output-devices-model <=> midi-io.output-devices-model;
     in-out property <int> output-selected-device-index <=> midi-io.output-selected-device-index;
     public function output-focus() {
         midi-io.output-focus();

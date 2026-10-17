@@ -3453,6 +3453,7 @@ dependencies = [
  "app_info",
  "embed-resource",
  "env_logger",
+ "i-slint-backend-winit",
  "log",
  "simonor",
  "slint",

@@ -11,7 +11,7 @@ import { VerticalBox } from "std-widgets.slint";
 import { Globals } from "../globals.slint";
 
 export component MidiIo inherits UCard {
-    background: UAppTheme.primary.selected;
+    background: UAppTheme.primary.selected; // Darkest
     width: 680px;
 
     in property <string> title;
@@ -45,6 +45,11 @@ export component MidiIo inherits UCard {
         title_layout := VerticalLayout {
             title_text := UText {
                 text: root.title;
+                // Lightest against the dark "selected" background
+                color: UAppTheme.primary.hover;
+                font_size: UAppTheme.font_size_medium;
+                font-italic: true;
+//                font_weight: FontWeight.bold;
             }
         }
         padding_top: 10px;

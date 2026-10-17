@@ -14,8 +14,16 @@ export enum SlintDeviceType {
 export component MainWindow inherits Window {
     init => {
         Palette.color-scheme = ColorScheme.dark;
-        UAppTheme.dark.primary = UAppTheme.calendula-gold;
+//        debug("MainWindow.init:  UAppTheme.dark.font-size-base = " + (UAppTheme.dark.font-size-base / 1px));
+        UAppTheme.dark.font-size-base = 17px; // Default 14
+        UAppTheme.dark.font-size-medium = 19px; // Default 16
+        UAppTheme.dark.font-size-big = 21px; // Default 18
+        UAppTheme.dark.font-size-bigger = 23px; // Default 20
+//        debug("MainWindow.init:  UAppTheme.dark.font-size-medium = " + (UAppTheme.dark.font-size-medium / 1px));
+//        UAppTheme.dark.primary = UAppTheme.calendula-gold;
+//        UAppTheme.dark.primary = UAppTheme.french-magenta;
 //        UAppTheme.dark.primary = UAppTheme.golden-purple;
+        UAppTheme.dark.primary = UAppTheme.lime;
         UAppTheme.dark.radius-base = 20px;
     }
     preferred_width: 700px;

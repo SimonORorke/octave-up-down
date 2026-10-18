@@ -2,17 +2,18 @@ use std::sync::{Arc};
 use log::{trace};
 use crate::{IUiMethods, MessageType, UiDeviceStrategy};
 
-/// The view-facing facade the `Presenter` speaks through.
+/// The view-facing facade the `Presenter` speaks through. If need be, it can be shared with other
+/// types via `Clone`.
 ///
 /// It owns the injected `IUiMethods` view seam and every user-facing message string (the `const`s
-/// below), exposing intention-named methods (e.g. `disconnected_from_pitchgrid`) so that each
+/// below), exposing intention-named methods so that each
 /// string and its severity live in one place rather than being chosen at the call site. It decides
 /// *nothing* about when to show a message — that is the Presenter's job; this type only formats and
 /// forwards to the view.
 ///
 /// It is a concrete type, not an `I`-prefixed service interface: tests mock the underlying
 /// `IUiMethods`, so the facade needs no interface of its own (see `IUiMethods`'s doc comment for the
-/// two-tier trait-naming rule). `Clone` is cheap — it wraps a single `Arc`.
+/// two-tier trait-naming rule).
 #[derive(Clone)]
 pub struct Presentation {
     ui_methods: Arc<dyn IUiMethods>,

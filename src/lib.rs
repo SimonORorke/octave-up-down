@@ -1,7 +1,10 @@
+pub mod presentation;
+pub mod settings;
 pub mod ui_device_strategy;
 pub mod ui_methods;
-pub mod presentation;
 
+pub use presentation::Presentation;
+pub use settings::{ISettings, Settings};
 pub use ui_device_strategy::{UiDeviceStrategy, UiInputStrategy, UiOutputStrategy};
 pub use ui_methods::{IUiMethods, MessageType, UiMethods};
 

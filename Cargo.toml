@@ -30,6 +30,7 @@ slint = "1.18.1"
 # Used for window attributes hook and winit monitor access across platforms.
 # Must track the slint version exactly.
 i-slint-backend-winit = "1.18.1"
+serde = "1.0.229"
 
 [build-dependencies]
 simonor = { path = "../simonor" }

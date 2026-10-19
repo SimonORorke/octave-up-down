@@ -19,10 +19,23 @@ edition = "2024"
 build = "build.rs"
 
 [dependencies]
-simonor = { path = "../simonor" }
+#simonor = { path = "../simonor" }
+#
+# For now at least, referencing the Git repo fixes the probable RustRover bug where
+# `use` for simonor types that were added to the library later are underlined
+# in red with error messages like
+#     unresolved import `simonor :: MidiReceiver' [E0432]
+#     no 'MidiReceiver' in the root
+# The program still compiles. So the problem is with RustRover, not Cargo.
+# The specific setup that seems to trigger it: a path dependency
+# (simonor = { path = "../simonor" }) that itself is a nested Cargo workspace living
+# outside the consuming project's content root, where newly added pub items aren't
+# picked up by the IDE's symbol index even after Invalidate Caches, a Cargo.toml touch,
+# and a full reopen — while cargo metadata/cargo build resolve it correctly.
+#
 # Once simonor is stable and pushed to remote Git, update the dependency to point
 # to its Git repo:
-# simonor = { git = "https://github.com/SimonORorke/simonor.git", branch = "main" }
+simonor = { git = "https://github.com/SimonORorke/simonor.git", branch = "main" }
 app_info = { path = "app_info" }
 env_logger = "0.11.11"
 log = "0.4.34"
@@ -32,10 +45,10 @@ slint = "1.18.1"
 # Must track the slint version exactly.
 i-slint-backend-winit = "1.18.1"
 serde = "1.0.229"
-rayon = "1.12.0"
 
 [build-dependencies]
-simonor = { path = "../simonor" }
+#simonor = { path = "../simonor" }
+simonor = { git = "https://github.com/SimonORorke/simonor.git", branch = "main" }
 app_info = { path = "app_info" }
 # Using embed-resource instead of the more popular winres
 # for application icon and exe file properties because

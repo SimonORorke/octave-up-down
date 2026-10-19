@@ -1,4 +1,6 @@
+pub mod midi_processor;
 pub mod presentation;
+pub mod presenter;
 pub mod settings;
 pub mod ui_device_strategy;
 pub mod ui_methods;

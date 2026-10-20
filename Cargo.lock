@@ -4329,7 +4329,6 @@ checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
 [[package]]
 name = "simonor"
 version = "0.1.0"
-source = "git+https://github.com/SimonORorke/simonor.git?branch=main#34d923b0e6fc013db47db4e8dff983fb5857985f"
 dependencies = [
  "simonor-core",
  "simonor-testing",
@@ -4338,7 +4337,6 @@ dependencies = [
 [[package]]
 name = "simonor-core"
 version = "0.1.0"
-source = "git+https://github.com/SimonORorke/simonor.git?branch=main#34d923b0e6fc013db47db4e8dff983fb5857985f"
 dependencies = [
  "directories",
  "log",
@@ -4355,7 +4353,6 @@ dependencies = [
 [[package]]
 name = "simonor-testing"
 version = "0.1.0"
-source = "git+https://github.com/SimonORorke/simonor.git?branch=main#34d923b0e6fc013db47db4e8dff983fb5857985f"
 dependencies = [
  "midly",
  "simonor-core",

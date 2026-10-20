@@ -1,3 +1,4 @@
+pub mod cc_no_ranges;
 pub mod midi_processor;
 pub mod presentation;
 pub mod presenter;
@@ -5,8 +6,9 @@ pub mod settings;
 pub mod ui_device_strategy;
 pub mod ui_methods;
 
+pub use cc_no_ranges::{CcNoRangeDefaults, CcNoRangeGetters, CcNoRangeSetters};
 pub use presentation::Presentation;
-pub use settings::{ISettings, Settings};
+pub use settings::{Settings};
 pub use ui_device_strategy::{UiDeviceStrategy, UiInputStrategy, UiOutputStrategy};
 pub use ui_methods::{IUiMethods, MessageType, UiMethods};
 

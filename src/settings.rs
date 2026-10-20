@@ -3,22 +3,9 @@ use log::trace;
 use serde::{Serialize, Deserialize};
 use simonor::{MidiDesktopSettings, PathFinder, SettingsFileIo};
 use app_info::APP_TITLE;
+use crate::{CcNoRangeDefaults, CcNoRangeGetters, CcNoRangeSetters};
 
-/// A trait that defines the interface for application settings.
-///
-/// For the `I` prefix, see `IUiMethods`s doc comment.
-pub trait ISettings: MidiDesktopSettings + Send + Sync {
-    fn down_cc_no(&self) -> u8;
-    fn set_down_cc_no(&mut self, value: u8);
-    fn up_cc_no(&self) -> u8;
-    fn set_up_cc_no(&mut self, value: u8);
-    fn in_cc_no(&self) -> u8;
-    fn set_in_cc_no(&mut self, value: u8);
-    fn out_cc_no(&self) -> u8;
-    fn set_out_cc_no(&mut self, value: u8);
-}
-
-// Application settings, serialised to file.
+/// Application settings, serialised to file.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Settings {
     auto_check_new_versions: bool,
@@ -44,10 +31,10 @@ impl Settings {
             main_window_y: 0,
             midi_input_device: String::new(),
             midi_output_device: String::new(),
-            down_cc_no: 64,
-            up_cc_no: 66,
-            in_cc_no: 11,
-            out_cc_no: 11,
+            down_cc_no: CcNoRangeDefaults::down_cc_no(),
+            up_cc_no: CcNoRangeDefaults::up_cc_no(),
+            in_cc_no: CcNoRangeDefaults::in_cc_no(),
+            out_cc_no: CcNoRangeDefaults::out_cc_no(),
             io: create_settings_reader_writer(),
         }
     }
@@ -127,31 +114,33 @@ impl MidiDesktopSettings for Settings {
     }
 }
 
-impl ISettings for Settings {
+impl CcNoRangeGetters for Settings {
     fn down_cc_no(&self) -> u8 {
         self.down_cc_no
-    }
-
-    fn set_down_cc_no(&mut self, value: u8) {
-        self.down_cc_no = value;
     }
 
     fn up_cc_no(&self) -> u8 {
         self.up_cc_no
     }
 
-    fn set_up_cc_no(&mut self, value: u8) { self.up_cc_no = value; }
-    
     fn in_cc_no(&self) -> u8 {
         self.in_cc_no
     }
 
-    fn set_in_cc_no(&mut self, value: u8) {
-        self.in_cc_no = value;
-    }
-
     fn out_cc_no(&self) -> u8 {
         self.out_cc_no
+    }
+}
+
+impl CcNoRangeSetters for Settings {
+    fn set_down_cc_no(&mut self, value: u8) {
+        self.down_cc_no = value;
+    }
+
+    fn set_up_cc_no(&mut self, value: u8) { self.up_cc_no = value; }
+
+    fn set_in_cc_no(&mut self, value: u8) {
+        self.in_cc_no = value;
     }
 
     fn set_out_cc_no(&mut self, value: u8) { self.out_cc_no = value; }

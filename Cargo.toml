@@ -40,6 +40,10 @@ slint = "1.18.1"
 i-slint-backend-winit = "1.18.1"
 serde = "1.0.229"
 
+[dev-dependencies]
+simonor = { path = "../simonor", features = ["testing"] }
+googletest = "0.14.3"
+
 [build-dependencies]
 simonor = { path = "../simonor" }
 #simonor = { git = "https://github.com/SimonORorke/simonor.git", branch = "main" }
@@ -48,5 +52,5 @@ app_info = { path = "app_info" }
 # for application icon and exe file properties because
 # winres puts an oblique before the apostrophe in my name.
 # It's a known shortcoming of winres to always 'escape' an apostrophe.
-embed-resource = "3.0.8"
+embed-resource = "3.0.12"
 slint-build = "1.18.1"

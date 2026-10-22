@@ -21,6 +21,9 @@ export component CcNoInput inherits HorizontalLayout {
             min-value: 0;
             max-value: 127;
             preferred-width: 95px;
+            // RustRover reports'Cannot convert void to callback'. It's a false positive
+            // that I might need to report to JetBrains/the Slint plugin tracker.
+            // See slint-ui/slint#8336.
             accepted => {
                 if self.value < self.min-value {
                     self.value = self.min-value;

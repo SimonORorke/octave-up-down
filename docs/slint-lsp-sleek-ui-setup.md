@@ -41,7 +41,7 @@ A junction is needed in every subdirectory of `ui/` that contains `.slint` files
 
 | Junction location | Files it serves |
 |---|---|
-| `ui/@sleek-ui` | `main_window.slint` |
+| `ui/@sleek-ui` | `main-window.slint` |
 | `ui/components/@sleek-ui` | `components/text.slint` |
 
 Each junction points directly to `ui/sleek-ui` inside the sibling `sleek-ui` repository
@@ -233,7 +233,7 @@ than commenting it out — either way, the script will now refuse to create junc
 ## Slint Live-Preview: Additional Requirement
 
 Slint Live-Preview (in the RustRover Slint plugin) only has access to files that are currently
-**open in editor tabs**. To preview `MainWindow` in `main_window.slint`, all files it imports must
+**open in editor tabs**. To preview `MainWindow` in `main-window.slint`, all files it imports must
 be open simultaneously:
 
 - `../sleek-ui/ui/sleek-ui/widgets.slint`

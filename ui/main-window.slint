@@ -4,7 +4,7 @@ import { UButton, UCard, UInputNumber, UText } from "@sleek-ui/widgets.slint";
 import { Globals, SlintMessageType } from "globals.slint";
 import { Alert } from "components/alert.slint";
 import { CcNoRange } from "components/cc.slint";
-import { MidiIo } from "components/midi_io.slint";
+import { MidiDevices } from "components/midi-devices.slint";
 
 export enum SlintDeviceType {
     input,
@@ -49,22 +49,22 @@ export component MainWindow inherits Window {
         alert.message-type = message-type;
     }
 
-    in-out property input-devices-model <=> midi-io.input-devices-model;
-    in-out property <int> input-selected-device-index <=> midi-io.input-selected-device-index;
+    in-out property input-devices-model <=> midi-devices.input-devices-model;
+    in-out property <int> input-selected-device-index <=> midi-devices.input-selected-device-index;
     public function input-focus() {
-        midi-io.input-focus();
+        midi-devices.input-focus();
     }
     public function input-show-connected-device-name(name: string, message-type: SlintMessageType) {
-        midi-io.input-show-connected-device-name(name, message-type);
+        midi-devices.input-show-connected-device-name(name, message-type);
     }
 
-    in-out property output-devices-model <=> midi-io.output-devices-model;
-    in-out property <int> output-selected-device-index <=> midi-io.output-selected-device-index;
+    in-out property output-devices-model <=> midi-devices.output-devices-model;
+    in-out property <int> output-selected-device-index <=> midi-devices.output-selected-device-index;
     public function output-focus() {
-        midi-io.output-focus();
+        midi-devices.output-focus();
     }
     public function output-show-connected-device-name(name: string, message-type: SlintMessageType) {
-        midi-io.output-show-connected-device-name(name, message-type);
+        midi-devices.output-show-connected-device-name(name, message-type);
     }
 
 	VerticalLayout {
@@ -98,22 +98,18 @@ export component MainWindow inherits Window {
                 root.out-cc-no-changed();
             }
         }
-        midi-io-layout := VerticalLayout {
-            padding-top: UAppTheme.padding-medium;
-            midi-io := MidiIo {
-                title: "MIDI Devices";
-                input-connect-device => {
-                    root.connect-device(SlintDeviceType.input)
-                }
-                output-connect-device => {
-                    root.connect-device(SlintDeviceType.output)
-                }
-                input-refresh-devices => {
-                    root.refresh-devices(SlintDeviceType.input)
-                }
-                output-refresh-devices => {
-                    root.refresh-devices(SlintDeviceType.output)
-                }
+        midi-devices := MidiDevices {
+            input-connect-device => {
+                root.connect-device(SlintDeviceType.input)
+            }
+            output-connect-device => {
+                root.connect-device(SlintDeviceType.output)
+            }
+            input-refresh-devices => {
+                root.refresh-devices(SlintDeviceType.input)
+            }
+            output-refresh-devices => {
+                root.refresh-devices(SlintDeviceType.output)
             }
         }
         status-bar-layout := HorizontalLayout {

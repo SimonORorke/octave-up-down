@@ -39,6 +39,7 @@ export component MidiIo inherits UCard {
         output-connected-device-name-text.text = name;
         output-connected-device-name-text.message-type = message-type;
     }
+
     VerticalLayout {
         spacing: UAppTheme.spacing-medium;
         padding: UAppTheme.padding-medium;
@@ -65,7 +66,7 @@ export component MidiIo inherits UCard {
                     changed current-index => {
                         root.input-selected-device-index = self.current-index;
                     }
-                    height: Globals.control-height;
+//                    height: Globals.control-height;
                     width: 420px;
                 }
             }
@@ -76,8 +77,8 @@ export component MidiIo inherits UCard {
                     clicked => {
                         root.input-connect-device()
                     }
-                    height: Globals.control-height;
-                    width: Globals.button-width;
+//                    height: Globals.control-height;
+//                    width: Globals.button-width;
                 }
             }
         }
@@ -104,7 +105,7 @@ export component MidiIo inherits UCard {
                     clicked => {
                         root.input-refresh-devices()
                     }
-                    height: Globals.control-height;
+//                    height: Globals.control-height;
                     width: 160px;
                 }
             }
@@ -123,7 +124,7 @@ export component MidiIo inherits UCard {
                     changed current-index => {
                         root.output-selected-device-index = self.current-index;
                     }
-                    height: Globals.control-height;
+//                    height: Globals.control-height;
                     width: 420px;
                 }
             }
@@ -134,8 +135,8 @@ export component MidiIo inherits UCard {
                     clicked => {
                         root.output-connect-device()
                     }
-                    height: Globals.control-height;
-                    width: Globals.button-width;
+//                    height: Globals.control-height;
+//                    width: Globals.button-width;
                 }
             }
         }
@@ -162,7 +163,7 @@ export component MidiIo inherits UCard {
                     clicked => {
                         root.output-refresh-devices()
                     }
-                    height: Globals.control-height;
+//                    height: Globals.control-height;
                     width: 160px;
                 }
             }

@@ -2,9 +2,4 @@
 // use std::sync::{Arc, Mutex, Weak};
 // use log::{debug, trace};
 // use simonor::SharedErrorNotifier;
-// // use simonor::{IMidiHub, MidiHub, SharedMidiHub, SharedOutput};
-// use simonor::{IMidiHub};
-// use simonor::{MidiHub};
-// use simonor::{SharedMidiHub};
-// use simonor::{SharedOutput};
-// use simonor::{IMidiSender, MidiSender, SharedMidiSender};
+// use simonor::{IMidiHub, MidiHub, SharedMidiHub, SharedOutput};

@@ -1,0 +1,72 @@
+import { UAppTheme } from "@sleek-ui/app-theme.slint";
+import { UCard, UInputNumber, UText } from "@sleek-ui/widgets.slint";
+
+export component CcNoInput inherits HorizontalLayout {
+    in property <string> title;
+    in-out property <int> cc-no;
+    callback cc-no-changed();
+
+    UText {
+        text: root.title;
+        preferred-width: 105px;
+        vertical-alignment: center;
+    }
+    number_layout := VerticalLayout {
+        padding_top: UAppTheme.padding-base;
+        UInputNumber {
+            value: root.cc-no;
+             // Only seems to work with arrors, not typing;
+             // so check in `accepted` handler.
+            enable-min-max: true;
+            min-value: 0;
+            max-value: 127;
+            preferred-width: 95px;
+            accepted => {
+                if self.value < self.min-value {
+                    self.value = self.min-value;
+                }
+                if self.value > self.max-value {
+                    self.value = self.max-value;
+                }
+                root.cc-no = self.value;
+                root.cc-no-changed();
+            }
+        }
+    }
+}
+
+export component CcNoRange inherits HorizontalLayout {
+    padding-top: UAppTheme.padding-medium;
+
+    in property <string> from-title;
+    in-out property <int> from-cc-no;
+    callback from-cc-no-changed();
+    in property <string> to-title;
+    in-out property <int> to-cc-no;
+    callback to-cc-no-changed();
+
+    UCard {
+        background: UAppTheme.primary.selected; // Darkest
+        width: 686px;
+
+        HorizontalLayout {
+            alignment: space-evenly;
+            from-input := CcNoInput {
+                title: root.from-title;
+                cc-no: root.from-cc-no;
+                cc-no-changed => {
+                    root.from-cc-no = self.cc-no;
+                    root.from-cc-no-changed();
+                }
+            }
+            to-input := CcNoInput {
+                title: root.to-title;
+                cc-no: root.to-cc-no;
+                cc-no-changed => {
+                    root.to-cc-no = self.cc-no;
+                    root.to-cc-no-changed();
+                }
+            }
+        }
+    }
+}

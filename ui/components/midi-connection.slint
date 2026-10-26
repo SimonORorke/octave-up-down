@@ -1,0 +1,79 @@
+import {
+    UButton,
+    USelect,
+    UText,
+} from "@sleek-ui/widgets.slint";
+import { UButtonVariant } from "@sleek-ui/common.slint";
+import { UAppTheme } from "@sleek-ui/app-theme.slint";
+import { MessageText } from "text.slint";
+import { SlintMessageType } from "../globals.slint";
+
+export component MidiConnection inherits VerticalLayout {
+    in property <string> title;
+
+    in-out property devices-model <=> devices-select.options;
+    in-out property <int> selected-device-index;
+    callback connect-device();
+    callback refresh-devices();
+    public function focus-select() {
+        devices-select.set-focus();
+    }
+    public function show-connected-device-name(name: string, message-type: SlintMessageType) {
+        connected-device-name-text.text = name;
+        connected-device-name-text.message-type = message-type;
+    }
+
+    HorizontalLayout {
+        UText {
+            text: root.title;
+            vertical-alignment: center;
+        }
+        VerticalLayout {
+            padding-left: UAppTheme.padding-base;
+            padding-right: UAppTheme.padding-medium;
+            devices-select := USelect {
+                preferred-width: 420px;
+                current-index: root.selected-device-index;
+                changed current-index => {
+                    root.selected-device-index = self.current-index;
+                }
+            }
+        }
+        VerticalLayout {
+            UButton {
+                text: "Connect";
+                variant: UButtonVariant.primary;
+                clicked => {
+                    root.connect-device()
+                }
+            }
+        }
+    }
+    GridLayout {
+        VerticalLayout {
+            col: 0;
+            UText {
+                text: "Connected: ";
+                horizontal-alignment: left;
+                vertical-alignment: center;
+            }
+        }
+        VerticalLayout {
+            col: 1;
+            connected-device-name-text := MessageText {
+                horizontal-alignment: left;
+                vertical-alignment: center;
+            }
+        }
+        VerticalLayout {
+            col: 2;
+            UButton {
+                text: "Refresh Devices";
+                width: 160px;
+                clicked => {
+                    root.refresh-devices()
+                }
+            }
+        }
+    }
+}

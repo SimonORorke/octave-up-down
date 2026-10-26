@@ -4,12 +4,9 @@ import { UButton, UCard, UInputNumber, UText } from "@sleek-ui/widgets.slint";
 import { Globals, SlintMessageType } from "globals.slint";
 import { Alert } from "components/alert.slint";
 import { CcNoRange } from "components/cc.slint";
-import { MidiDevices } from "components/midi-devices.slint";
+import { MidiDevices, SlintDeviceType } from "components/midi-devices.slint";
 
-export enum SlintDeviceType {
-    input,
-    output
-}
+export { SlintDeviceType }
 
 // As of Slint 18.1 and sleek-ui 1.6.0, Show Preview does not work.
 export component MainWindow inherits Window {
@@ -99,23 +96,17 @@ export component MainWindow inherits Window {
             }
         }
         midi-devices := MidiDevices {
-            input-connect-device => {
-                root.connect-device(SlintDeviceType.input)
+            connect-device(device-type) => {
+                root.connect-device(device-type)
             }
-            output-connect-device => {
-                root.connect-device(SlintDeviceType.output)
-            }
-            input-refresh-devices => {
-                root.refresh-devices(SlintDeviceType.input)
-            }
-            output-refresh-devices => {
-                root.refresh-devices(SlintDeviceType.output)
+            refresh-devices(device-type) => {
+                root.refresh-devices(device-type)
             }
         }
         status-bar-layout := HorizontalLayout {
             icon-layout := HorizontalLayout {
                 padding-top: UAppTheme.padding-medium;
-                Image {
+                icon-image := Image {
                     source: Globals.icon;
                     width: 40px; height: 40px;
                 }

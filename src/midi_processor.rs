@@ -279,6 +279,17 @@ mod tests {
     }
 
     #[googletest::gtest]
+    fn test_out_is_up() {
+        let _guard = test_mutex_guard();
+        let mut midi_processor =
+            MidiProcessor::new(Arc::new(Mutex::new(MockMidiSender::new())));
+        midi_processor.up_cc_no = midi_processor.out_cc_no;
+        on_in(&mut midi_processor, 127);
+        on_note_on(&mut midi_processor, 60, 61);
+        assert_that!(mock_midi_sender().note_on_key, eq(72));
+    }
+
+    #[googletest::gtest]
     fn test_other_control_change() {
         let _guard = test_mutex_guard();
         let mut midi_processor =

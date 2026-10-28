@@ -1,6 +1,9 @@
+use std::sync::{Arc, Mutex};
 use midly::{MidiMessage, live::LiveEvent, num::u7};
 use simonor::{MidiReceiver, MidiSender, SharedMidiSender};
 use crate::{CcNoRangeDefaults, CcNoRangeSetters};
+
+pub trait IMidiProcessor: CcNoRangeSetters + MidiReceiver {}
 
 pub struct MidiProcessor {
     down_cc_no: u8,
@@ -102,6 +105,8 @@ impl MidiProcessor {
     }
 }
 
+impl IMidiProcessor for MidiProcessor {}
+
 impl CcNoRangeSetters for MidiProcessor {
     fn set_down_cc_no(&mut self, value: u8) {
         self.down_cc_no = value;
@@ -125,6 +130,14 @@ impl MidiReceiver for MidiProcessor {
         }
     }
 }
+
+impl MidiReceiver for Box<dyn IMidiProcessor> {
+    fn on_message(&mut self, raw_message: &[u8]) {
+        (**self).on_message(raw_message);
+    }
+}
+
+pub type SharedMidiProcessor = Arc<Mutex<Box<dyn IMidiProcessor>>>;
 
 #[cfg(test)]
 mod tests {

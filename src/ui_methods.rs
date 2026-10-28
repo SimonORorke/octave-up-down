@@ -1,11 +1,13 @@
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 use i_slint_backend_winit::WinitWindowAccessor;
 use log::trace;
 use slint::{ComponentHandle, PhysicalPosition, Weak};
 #[cfg(target_os = "macos")]
 use slint::LogicalPosition;
+use app_info::APP_TITLE;
 use simonor::{DeviceType};
-use crate::{MainWindow, OptionsModel as MainOptionsModel, SlintMessageType, UiDeviceStrategy,
+use crate::{MainWindow, NewVersionCallbacks, OptionsModel, SlintMessageType, UiDeviceStrategy,
             UOptionData};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -48,7 +50,13 @@ pub trait IUiMethods: Send + Sync {
     fn show_connected_device_name(&self, name: &str, msg_type: MessageType,
                                   device_strategy: &dyn UiDeviceStrategy);
     fn show_message(&self, msg: &str, msg_type: MessageType);
+    fn show_new_version_window(&self, new_version: &str, auto_check_new_versions: bool,
+                               callbacks: Arc<Mutex<dyn NewVersionCallbacks>>);
     fn set_main_window_position(&self, x: i32, y: i32);
+    fn set_down_cc_no(&self, value: u8);
+    fn set_up_cc_no(&self, value: u8);
+    fn set_in_cc_no(&self, value: u8);
+    fn set_out_cc_no(&self, value: u8);
 }
 
 /// This struct contains the methods called by `Presenter` to make changes to the UI.
@@ -148,11 +156,11 @@ impl IUiMethods for UiMethods {
             trace!("set_devices_model: Inside with_main_window closure");
             let model = match device_type {
                 DeviceType::Input => {
-                    let input_model = Rc::new(MainOptionsModel(device_items.clone()));
+                    let input_model = Rc::new(OptionsModel(device_items.clone()));
                     slint::ModelRc::from(input_model)
                 },
                 DeviceType::Output => {
-                    let output_model = Rc::new(MainOptionsModel(device_items.clone()));
+                    let output_model = Rc::new(OptionsModel(device_items.clone()));
                     slint::ModelRc::from(output_model)
                 },
             };
@@ -179,6 +187,37 @@ impl IUiMethods for UiMethods {
         self.with_main_window(move |main_window| {
             main_window.invoke_show_message(message.into(), slint_message_type(message_type));
         });
+    }
+
+    fn show_new_version_window(&self, new_version: &str, auto_check_new_versions: bool,
+                               callbacks: Arc<Mutex<dyn NewVersionCallbacks>>) {
+        // let new_version_string = new_version.to_string();
+        // let new_version_window_weak = self.new_version_window_weak.clone();
+        // let self_clone = self.clone();
+        // self.with_ui_thread(move || {
+        //     let dialog_borrow = new_version_window_weak.upgrade().unwrap();
+        //     // Re-setup callbacks each time as the window might be reused
+        //     dialog_borrow.set_auto_check_new_versions(auto_check_new_versions);
+        //     dialog_borrow.set_message(
+        //         format!("Version {} of {} is available.", new_version_string, APP_TITLE).into());
+        //
+        //     let callbacks_clone_1 = callbacks.clone();
+        //     dialog_borrow.on_auto_check_new_versions_changed(move |auto_check_new_versions: bool| {
+        //         callbacks_clone_1.lock().unwrap().on_auto_check_new_versions_changed(
+        //             auto_check_new_versions);
+        //     });
+        //     let callbacks_clone_2 = callbacks.clone();
+        //     dialog_borrow.on_ignore_this_version(move || {
+        //         callbacks_clone_2.lock().unwrap().on_ignore_this_version(
+        //             new_version_string.clone());
+        //     });
+        //     dialog_borrow.on_close_window({
+        //         let dialog_weak = dialog_borrow.as_weak();
+        //         move || { dialog_weak.unwrap().hide().unwrap(); }
+        //     });
+        //
+        //     self_clone.show_dialog_in_centre_of_main_window(&dialog_borrow);
+        // });
     }
 
     fn set_main_window_position(&self, x: i32, y: i32) {
@@ -216,6 +255,30 @@ impl IUiMethods for UiMethods {
                 #[cfg(not(target_os = "macos"))]
                 main_window.window().set_position(PhysicalPosition { x, y });
             }
+        });
+    }
+
+    fn set_down_cc_no(&self, value: u8) {
+        self.with_main_window(move |main_window| {
+            main_window.set_down_cc_no(value as i32);
+        });
+    }
+
+    fn set_up_cc_no(&self, value: u8) {
+        self.with_main_window(move |main_window| {
+            main_window.set_up_cc_no(value as i32);
+        });
+    }
+
+    fn set_in_cc_no(&self, value: u8) {
+        self.with_main_window(move |main_window| {
+            main_window.set_in_cc_no(value as i32);
+        });
+    }
+
+    fn set_out_cc_no(&self, value: u8) {
+        self.with_main_window(move |main_window| {
+            main_window.set_out_cc_no(value as i32);
         });
     }
 }

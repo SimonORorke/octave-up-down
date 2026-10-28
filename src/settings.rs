@@ -6,6 +6,8 @@ use app_info::APP_TITLE;
 use crate::{CcNoRangeDefaults, CcNoRangeGetters, CcNoRangeSetters};
 
 /// Application settings, serialised to file.
+pub trait ISettings: MidiDesktopSettings + CcNoRangeGetters + CcNoRangeSetters + Send + Sync {}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Settings {
     auto_check_new_versions: bool,
@@ -39,6 +41,7 @@ impl Settings {
         }
     }
 }
+impl ISettings for Settings {}
 
 impl MidiDesktopSettings for Settings {
     fn auto_check_new_versions(&self) -> bool { self.auto_check_new_versions }

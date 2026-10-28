@@ -1,6 +1,6 @@
-use std::sync::{Arc};
+use std::sync::{Arc, Mutex};
 use log::{trace};
-use crate::{IUiMethods, MessageType, UiDeviceStrategy};
+use crate::{IUiMethods, MessageType, NewVersionCallbacks, UiDeviceStrategy};
 
 /// The view-facing facade the `Presenter` speaks through. If need be, it can be shared with other
 /// types via `Clone`.
@@ -74,13 +74,37 @@ impl Presentation {
         self.ui_methods.show_message(message, MessageType::Warning);
     }
 
+    pub(crate) fn show_new_version_window(&self, new_version: &str, auto_check_new_versions: bool,
+                                          callbacks: Arc<Mutex<dyn NewVersionCallbacks>>) {
+        self.ui_methods.show_new_version_window(new_version, auto_check_new_versions, callbacks);
+    }
+
+    pub(crate) fn set_down_cc_no(&self, value: u8) {
+        self.ui_methods.set_down_cc_no(value);
+    }
+
+    pub(crate) fn set_up_cc_no(&self, value: u8) {
+        self.ui_methods.set_up_cc_no(value);
+    }
+
+    pub(crate) fn set_in_cc_no(&self, value: u8) {
+        self.ui_methods.set_in_cc_no(value);
+    }
+
+    pub(crate) fn set_out_cc_no(&self, value: u8) {
+        self.ui_methods.set_out_cc_no(value);
+    }
+
     // --- Intention-named status messages (string + severity owned here) ---
 
-    pub(crate) fn midi_send_error(&self) { self.show_error(MIDI_SEND_ERROR); }
+    pub(crate) fn already_running_latest_version(&self) {
+        self.show_info(ALREADY_RUNNING_LATEST_VERSION);
+    }
 }
 
 // User-facing message strings. Owned here so every string the player sees lives in one module.
+
+pub const ALREADY_RUNNING_LATEST_VERSION: &str = "You are already running the latest version.";
+
 // `DEVICE_NONE` is the sentinel shown (and recorded by tests) when no MIDI device is connected.
 pub const DEVICE_NONE: &str = "[None]";
-pub const MIDI_SEND_ERROR: &str = "MIDI send error. Try restarting the application and/or editor \
-    and/or instrument";

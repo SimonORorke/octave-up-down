@@ -36,12 +36,10 @@ fn main() -> Result<(), slint::PlatformError> {
                      presenter.clone(), ui_methods.clone(),
                      // about_window.clone()
     );
-
     // Initialise presenter on a background thread so that UI callbacks within
     // init() can use invoke_from_event_loop without deadlocking.
     let self_arc = Arc::clone(&presenter);
     spawn_presenter_action(&presenter, move |c| c.init(&self_arc));
-
     debug!("main: Running main_window");
     main_window.run()
 }

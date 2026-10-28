@@ -3480,6 +3480,7 @@ dependencies = [
  "i-slint-backend-winit",
  "log",
  "midly",
+ "rayon",
  "serde",
  "simonor",
  "slint",

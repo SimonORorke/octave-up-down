@@ -232,6 +232,26 @@ impl Presenter {
         self.presentation.no_device_connected(&*device_strategy);
         self.presentation.show_warning(device_strategy.msg_refreshed_reconnect());
     }
+
+    pub fn set_down_cc_no(&mut self, value: u8) {
+        self.midi_processor.lock().unwrap().set_down_cc_no(value);
+        self.settings.set_down_cc_no(value);
+    }
+
+    pub fn set_up_cc_no(&mut self, value: u8) {
+        self.midi_processor.lock().unwrap().set_up_cc_no(value);
+        self.settings.set_up_cc_no(value);
+    }
+
+    pub fn set_in_cc_no(&mut self, value: u8) {
+        self.midi_processor.lock().unwrap().set_in_cc_no(value);
+        self.settings.set_in_cc_no(value);
+    }
+
+    pub fn set_out_cc_no(&mut self, value: u8) {
+        self.midi_processor.lock().unwrap().set_out_cc_no(value);
+        self.settings.set_out_cc_no(value);
+    }
 }
 
 pub trait NewVersionCallbacks : Send + Sync {
@@ -269,4 +289,4 @@ impl NewVersionCallbacks for NewVersionCallbacksWrapper {
     }
 }
 
-type SharedPresenter = Arc<Mutex<Presenter>>;
+pub type SharedPresenter = Arc<Mutex<Presenter>>;

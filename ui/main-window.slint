@@ -29,14 +29,14 @@ export component MainWindow inherits Window {
     icon: Globals.icon;
 
     in property <string> window-title;
-    in-out property <int> down-cc-no;
-    callback down-cc-no-changed();
-    in-out property <int> up-cc-no;
-    callback up-cc-no-changed();
-    in-out property <int> in-cc-no;
-    callback in-cc-no-changed();
-    in-out property <int> out-cc-no;
-    callback out-cc-no-changed();
+    in property <int> down-cc-no;
+    callback down-cc-no-changed(value: int);
+    in property <int> up-cc-no;
+    callback up-cc-no-changed(value: int);
+    in property <int> in-cc-no;
+    callback in-cc-no-changed(value: int);
+    in property <int> out-cc-no;
+    callback out-cc-no-changed(value: int);
 
     callback connect-device(device-type: SlintDeviceType);
     callback refresh-devices(device-type: SlintDeviceType);
@@ -71,28 +71,24 @@ export component MainWindow inherits Window {
             from-title: "Down CC No";
             from-cc-no: root.down-cc-no;
             from-cc-no-changed => {
-                root.down-cc-no = self.from-cc-no;
-                root.down-cc-no-changed();
+                root.down-cc-no-changed(self.from-cc-no);
             }
             to-title: "Up CC No";
             to-cc-no: root.up-cc-no;
             to-cc-no-changed => {
-                root.up-cc-no = self.to-cc-no;
-                root.up-cc-no-changed();
+                root.up-cc-no-changed(self.to-cc-no);
             }
         }
         in-out-range := CcNoRange {
             from-title: "In CC No";
             from-cc-no: root.in-cc-no;
             from-cc-no-changed => {
-                root.in-cc-no = self.from-cc-no;
-                root.in-cc-no-changed();
+                root.in-cc-no-changed(self.from-cc-no);
             }
             to-title: "Out CC No";
             to-cc-no: root.out-cc-no;
             to-cc-no-changed => {
-                root.out-cc-no = self.to-cc-no;
-                root.out-cc-no-changed();
+                root.out-cc-no-changed(self.to-cc-no);
             }
         }
         midi-devices := MidiDevices {

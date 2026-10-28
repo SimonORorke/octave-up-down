@@ -3,8 +3,8 @@ import { UCard, UInputNumber, UText } from "@sleek-ui/widgets.slint";
 
 export component CcNoInput inherits HorizontalLayout {
     in property <string> title;
-    in-out property <int> cc-no;
-    callback cc-no-changed();
+    in property <int> cc-no;
+    callback cc-no-changed(value: int);
 
     UText {
         text: root.title;
@@ -13,10 +13,16 @@ export component CcNoInput inherits HorizontalLayout {
     }
     number_layout := VerticalLayout {
         padding_top: UAppTheme.padding-base;
-        UInputNumber {
+        number:= UInputNumber {
             value: root.cc-no;
-             // Only seems to work with arrors, not typing;
-             // so check in `accepted` handler.
+             // `edited` fires on every typed keystroke (not on Enter), but
+             // range validation/correction doesn't work reliably there;
+             // `accepted` does the validation correctly but, like `edited`,
+             // fires only for typed changes, not for the increase/decrease
+             // buttons (or the arrow keys, which trigger those buttons
+             // internally). `changed value` fires for every way `value` can
+             // change, so it is used here instead, without needing to modify
+             // the sleek-ui-provided UInputNumber widget.
             enable-min-max: true;
             min-value: 0;
             max-value: 127;
@@ -28,8 +34,10 @@ export component CcNoInput inherits HorizontalLayout {
                 if self.value > self.max-value {
                     self.value = self.max-value;
                 }
-                root.cc-no = self.value;
-                root.cc-no-changed();
+            }
+            changed value => {
+//                debug("CcNoInput.number.value changed: " + self.value);
+                root.cc-no-changed(self.value);
             }
         }
     }
@@ -39,11 +47,11 @@ export component CcNoRange inherits HorizontalLayout {
     padding-top: UAppTheme.padding-medium;
 
     in property <string> from-title;
-    in-out property <int> from-cc-no;
-    callback from-cc-no-changed();
+    in property <int> from-cc-no;
+    callback from-cc-no-changed(value: int);
     in property <string> to-title;
-    in-out property <int> to-cc-no;
-    callback to-cc-no-changed();
+    in property <int> to-cc-no;
+    callback to-cc-no-changed(value: int);
 
     UCard {
         background: UAppTheme.primary.selected; // Darkest
@@ -54,17 +62,16 @@ export component CcNoRange inherits HorizontalLayout {
             from-input := CcNoInput {
                 title: root.from-title;
                 cc-no: root.from-cc-no;
-                cc-no-changed => {
-                    root.from-cc-no = self.cc-no;
-                    root.from-cc-no-changed();
+                cc-no-changed(value) => {
+//                    debug("CcNoRange.from-input.cc-no-changed: " + value);
+                    root.from-cc-no-changed(value);
                 }
             }
             to-input := CcNoInput {
                 title: root.to-title;
                 cc-no: root.to-cc-no;
-                cc-no-changed => {
-                    root.to-cc-no = self.cc-no;
-                    root.to-cc-no-changed();
+                cc-no-changed(value) => {
+                    root.to-cc-no-changed(value);
                 }
             }
         }

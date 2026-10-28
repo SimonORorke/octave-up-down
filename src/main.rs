@@ -153,6 +153,7 @@ fn init_ui_handlers(main_window: &MainWindow,
     {
         let presenter: SharedPresenter = Arc::clone(&presenter);
         main_window.on_down_cc_no_changed(move |value| {
+            trace!("init_ui_handlers on_down_cc_no_changed: {}", value);
             spawn_presenter_action(
                 &presenter, move |c| c.set_down_cc_no(value as u8));
         });

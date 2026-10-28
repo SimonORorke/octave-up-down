@@ -70,25 +70,26 @@ export component MainWindow inherits Window {
         down-up-range := CcNoRange {
             from-title: "Down CC No";
             from-cc-no: root.down-cc-no;
-            from-cc-no-changed => {
-                root.down-cc-no-changed(self.from-cc-no);
+            from-cc-no-changed(value) => {
+//                debug("MainWindow.down-up-range.from-cc-no-changed: " + value);
+                root.down-cc-no-changed(value);
             }
             to-title: "Up CC No";
             to-cc-no: root.up-cc-no;
-            to-cc-no-changed => {
-                root.up-cc-no-changed(self.to-cc-no);
+            to-cc-no-changed(value) => {
+                root.up-cc-no-changed(value);
             }
         }
         in-out-range := CcNoRange {
             from-title: "In CC No";
             from-cc-no: root.in-cc-no;
-            from-cc-no-changed => {
-                root.in-cc-no-changed(self.from-cc-no);
+            from-cc-no-changed(value) => {
+                root.in-cc-no-changed(value);
             }
             to-title: "Out CC No";
             to-cc-no: root.out-cc-no;
-            to-cc-no-changed => {
-                root.out-cc-no-changed(self.to-cc-no);
+            to-cc-no-changed(value) => {
+                root.out-cc-no-changed(value);
             }
         }
         midi-devices := MidiDevices {

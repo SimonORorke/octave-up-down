@@ -1,5 +1,5 @@
 use std::error::Error;
-use log::trace;
+use log::{debug, trace};
 use serde::{Serialize, Deserialize};
 use simonor::{MidiDesktopSettings, PathFinder, SettingsFileIo};
 use app_info::APP_TITLE;
@@ -106,8 +106,8 @@ impl MidiDesktopSettings for Settings {
 
     fn write_to_file(&mut self) -> Result<(), Box<dyn Error>> {
         self.io.write_to_file(&self)?;
-        trace!("write_to_file: self.midi_input_device = {}; self.midi_output_device = {}", 
-            self.midi_input_device, self.midi_output_device);
+        trace!("write_to_file: self.down_cc_no = {}; self.up_cc_no = {}",
+            self.down_cc_no, self.up_cc_no);
         Ok(())
     }
 

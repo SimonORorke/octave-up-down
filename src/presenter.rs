@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::sync::{Arc, Mutex, Weak};
-use log::{trace};
+use log::{debug, trace};
 use simonor::{IMidiHub, IMidiSender, MidiHub, MidiSender, ReleaseInfo,
               SharedMidiHub, SharedMidiSender, SharedReleaseInfo, SharedOutput, VersionChecker};
 use app_info::{APP_TITLE, RELEASES_LINK, VERSION};

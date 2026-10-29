@@ -51,6 +51,9 @@ export component MidiDevices inherits VerticalLayout {
             input-connection := MidiConnection {
                 title: "MIDI Input";
                 selected-device-index: root.input-selected-device-index;
+                changed selected-device-index => {
+                    root.input-selected-device-index = self.selected-device-index;
+                }
                 connect-device => {
                     root.connect-device(SlintDeviceType.input)
                 }
@@ -61,6 +64,9 @@ export component MidiDevices inherits VerticalLayout {
             output-connection := MidiConnection {
                 title: "MIDI Output";
                 selected-device-index: root.output-selected-device-index;
+                changed selected-device-index => {
+                    root.output-selected-device-index = self.selected-device-index;
+                }
                 connect-device => {
                     root.connect-device(SlintDeviceType.output)
                 }

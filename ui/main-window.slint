@@ -42,7 +42,7 @@ export component MainWindow inherits Window {
     callback refresh-devices(device-type: SlintDeviceType);
 
     public function show-message(message: string, message-type: SlintMessageType) {
-        alert.message = @markdown("\\{message}");
+        alert.message = @markdown("\{message}");
         alert.message-type = message-type;
     }
 

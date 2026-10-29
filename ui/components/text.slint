@@ -9,14 +9,15 @@ export component MessageText inherits UText {
     wrap: TextWrap.word-wrap;
 
     function get-color() -> color {
+        // The "hover" brush is lightest against the dark "selected" brush of the background.
         if (root.message-type == SlintMessageType.Error) {
-            return UAppTheme.dust-red.base;
+            return UAppTheme.dust-red.hover;
         } else if (root.message-type == SlintMessageType.Info) {
-            return UAppTheme.geek-blue.base;
+            return UAppTheme.geek-blue.hover;
         } else if (root.message-type == SlintMessageType.Success) {
-            return UAppTheme.polar-green.base;
+            return UAppTheme.polar-green.hover;
         } else { // Warning
-            return UAppTheme.sunset-orange.base;
+            return UAppTheme.sunset-orange.hover;
         }
     }
 }

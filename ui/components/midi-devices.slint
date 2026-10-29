@@ -17,6 +17,7 @@ export component MidiDevices inherits VerticalLayout {
     in-out property input-devices-model <=> input-connection.devices-model;
     in-out property <int> input-selected-device-index;
     public function input-focus() {
+        output-connection.clear-focus-highlight();
         input-connection.focus-select();
     }
     public function input-show-connected-device-name(name: string, message-type: SlintMessageType) {
@@ -26,6 +27,7 @@ export component MidiDevices inherits VerticalLayout {
     in-out property output-devices-model <=> output-connection.devices-model;
     in-out property <int> output-selected-device-index;
     public function output-focus() {
+        input-connection.clear-focus-highlight();
         output-connection.focus-select();
     }
     public function output-show-connected-device-name(name: string, message-type: SlintMessageType) {

@@ -13,10 +13,19 @@ export component MidiConnection inherits VerticalLayout {
 
     in-out property devices-model <=> devices-select.options;
     in-out property <int> selected-device-index;
+
+    // Used to work around the problem where Sleek UI does not automatically show
+    // the focus border when a widget is focused programatically.
+    private property <bool> show-focus-highlight: false;
+
     callback connect-device();
     callback refresh-devices();
     public function focus-select() {
+        show-focus-highlight = true;
         devices-select.set-focus();
+    }
+    public function clear-focus-highlight() {
+        show-focus-highlight = false;
     }
     public function show-connected-device-name(name: string, message-type: SlintMessageType) {
         connected-device-name-text.text = name;
@@ -34,8 +43,19 @@ export component MidiConnection inherits VerticalLayout {
             devices-select := USelect {
                 preferred-width: 420px;
                 current-index: root.selected-device-index;
+                border-width: (root.show-focus-highlight || self.has-tab-focus)
+                    ? UAppTheme.focus-border-width
+                    : UAppTheme.border-width-base;
+                border-color: (root.show-focus-highlight || self.has-tab-focus)
+                    ? UAppTheme.focus-color
+                    : UAppTheme.border;
                 changed current-index => {
                     root.selected-device-index = self.current-index;
+                }
+                changed has-focus => {
+                    if !self.has-focus {
+                        root.show-focus-highlight = false;
+                    }
                 }
             }
         }

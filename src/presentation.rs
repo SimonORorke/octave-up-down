@@ -100,11 +100,16 @@ impl Presentation {
     pub(crate) fn already_running_latest_version(&self) {
         self.show_info(ALREADY_RUNNING_LATEST_VERSION);
     }
+
+    pub(crate) fn midi_connected(&self) {
+        self.show_info(MIDI_CONNECTED);
+    }
 }
 
 // User-facing message strings. Owned here so every string the player sees lives in one module.
 
 pub const ALREADY_RUNNING_LATEST_VERSION: &str = "You are already running the latest version.";
+pub const MIDI_CONNECTED: &str = "MIDI input and output are connected.";
 
 // `DEVICE_NONE` is the sentinel shown (and recorded by tests) when no MIDI device is connected.
 pub const DEVICE_NONE: &str = "[None]";

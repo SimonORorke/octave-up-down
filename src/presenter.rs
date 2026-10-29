@@ -144,6 +144,7 @@ impl Presenter {
             trace!("connect_initial_port: Setting selected port index to {}", index);
             self.presentation.set_selected_device_index(index, device_strategy);
             self.connect_selected_device(&shared_midi, device_strategy);
+            self.presentation.midi_connected();
         } else {
             self.presentation.no_device_connected(device_strategy);
             self.presentation.show_warning(device_strategy.msg_connect());

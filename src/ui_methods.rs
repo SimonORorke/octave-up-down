@@ -106,6 +106,14 @@ impl UiMethods {
         }).unwrap();
         rx.recv().unwrap_or_default()
     }
+
+    /// Provide the specified closure for execution on the UI thread.
+    fn with_ui_thread<F>(&self, f: F)
+    where
+        F: FnOnce() + Send + 'static,
+    {
+        slint::invoke_from_event_loop(f).unwrap();
+    }
 }
 
 impl IUiMethods for UiMethods {

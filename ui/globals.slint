@@ -1,5 +1,18 @@
+import { UAppTheme } from "@sleek-ui/app-theme.slint";
+
 export global Globals {
     out property<image> icon: @image-url("images/Octave Up-Down.png");
+    out property<color> window_background: complementary-color(UAppTheme.primary.selected);
+
+    // Returns the complementary (opposite) colour of the specified colour.
+    function complementary-color(relative-to-color: color) -> color {
+        return hsv(
+            mod(relative-to-color.to-hsv().hue + 180, 360),
+            relative-to-color.to-hsv().saturation,
+            relative-to-color.to-hsv().value,
+            relative-to-color.to-hsv().alpha,
+        );
+    }
 }
 
 export enum SlintMessageType {

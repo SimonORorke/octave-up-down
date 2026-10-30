@@ -167,11 +167,7 @@ impl Presenter {
             .map(|p| p.name().to_string());
         trace!("connect_new_device: Got port");
         if let Some(device_name) = device_name_opt {
-            if self.midi_hub.lock().unwrap().are_devices_connected() {
-                self.presentation.midi_connected();
-            } else {
-                self.presentation.show_info(device_strategy.msg_connected(&device_name));
-            }
+            self.presentation.show_info(device_strategy.msg_connected(&device_name));
         }
         trace!("connect_new_device: Done");
     }

@@ -5,7 +5,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-description = "Octave Up-Down"
+description = "Octave Up-Down for MIDI Pedals"
 license = "MIT or Apache-2.0"
 version = "0.1.0"
 

@@ -1,1 +1,1 @@
-# Octave Up-Down
+# Octave Up-Down for MIDI Pedals

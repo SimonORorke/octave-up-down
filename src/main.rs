@@ -140,7 +140,7 @@ fn init_ui_handlers(main_window: &MainWindow,
         let presenter: SharedPresenter = Arc::clone(&presenter);
         main_window.on_connect_device(move |device_type: SlintDeviceType| {
             let device_strategy = create_device_strategy(device_type);
-            spawn_presenter_action(&presenter, move |c| c.connect_device(&*device_strategy));
+            spawn_presenter_action(&presenter, move |c| c.connect_new_device(&*device_strategy));
         });
     }
     {

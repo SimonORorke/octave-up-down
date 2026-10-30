@@ -133,7 +133,7 @@ impl Presenter {
     }
 
     fn connect_initial_device(&mut self, device_strategy: &dyn UiDeviceStrategy) {
-        trace!("connect_initial_port: {:?}", device_strategy.device_type());
+        trace!("connect_initial_device: {:?}", device_strategy.device_type());
         let shared_midi = self.midi_hub.clone();
         let maybe_index = {
             let midi = shared_midi.lock().unwrap();
@@ -141,10 +141,12 @@ impl Presenter {
                 .map(|device| device.index())
         };
         if let Some(index) = maybe_index {
-            trace!("connect_initial_port: Setting selected port index to {}", index);
+            trace!("connect_initial_device: Setting selected port index to {}", index);
             self.presentation.set_selected_device_index(index, device_strategy);
             self.connect_selected_device(&shared_midi, device_strategy);
-            self.presentation.midi_connected();
+            if self.midi_hub.lock().unwrap().are_devices_connected() {
+                self.presentation.midi_connected();
+            }
         } else {
             self.presentation.no_device_connected(device_strategy);
             self.presentation.show_warning(device_strategy.msg_connect());
@@ -152,22 +154,26 @@ impl Presenter {
         }
     }
 
-    pub fn connect_device(&mut self, device_strategy: &dyn UiDeviceStrategy) {
-        trace!("connect_device");
+    pub fn connect_new_device(&mut self, device_strategy: &dyn UiDeviceStrategy) {
+        trace!("connect_new_device: {:?}", device_strategy.device_type());
         let shared_midi = self.midi_hub.clone();
         let device_strategy = device_strategy.clone_box();
-        trace!("connect_device: Connecting selected port");
+        trace!("connect_new_device: Connecting selected port");
         self.connect_selected_device(&shared_midi, &*device_strategy);
-        trace!("connect_device: Getting port");
+        trace!("connect_new_device: Getting port");
         let device_name_opt: Option<String> = shared_midi.lock().unwrap()
             .io(device_strategy.midi_strategy())
             .device()
             .map(|p| p.name().to_string());
-        trace!("connect_device: Got port");
+        trace!("connect_new_device: Got port");
         if let Some(device_name) = device_name_opt {
-            self.presentation.show_info(device_strategy.msg_connected(&device_name));
+            if self.midi_hub.lock().unwrap().are_devices_connected() {
+                self.presentation.midi_connected();
+            } else {
+                self.presentation.show_info(device_strategy.msg_connected(&device_name));
+            }
         }
-        trace!("connect_device: Done");
+        trace!("connect_new_device: Done");
     }
 
     fn connect_selected_device(&mut self, shared_midi: &SharedMidiHub,

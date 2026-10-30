@@ -16,6 +16,8 @@ export component MidiConnection inherits VerticalLayout {
 
     // Used to work around the problem where Sleek UI does not automatically show
     // the focus border when a widget is focused programmatically.
+    // I've investigated subclassing USelect instead, but it does not look practicable,
+    // though it does look it would be easy to do for ButtonInterface.
     // I've raised a feature request with Sleek for the required enhancement:
     // https://github.com/uAtomicBoolean/sleek-ui/issues/107.
     private property <bool> show-focus-highlight: false;

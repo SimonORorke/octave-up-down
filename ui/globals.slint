@@ -2,7 +2,7 @@ import { UAppTheme } from "@sleek-ui/app-theme.slint";
 
 export global Globals {
     out property<image> icon: @image-url("images/Octave Up-Down.png");
-    out property<color> window_background: complementary-color(UAppTheme.primary.selected);
+    out property<color> window_background: to-background-color(UAppTheme.primary.selected);
 
     // Returns the complementary (opposite) colour of the specified colour.
     function complementary-color(relative-to-color: color) -> color {
@@ -12,6 +12,26 @@ export global Globals {
             relative-to-color.to-hsv().value,
             relative-to-color.to-hsv().alpha,
         );
+    }
+
+//    function invert-lightness(relative-to-color: color) -> color {
+//        return oklch(
+//            1 - relative-to-color.to-oklch().lightness,
+//            relative-to-color.to-oklch().chroma,
+//            relative-to-color.to-oklch().hue,
+//            relative-to-color.to-oklch().alpha,
+//        );
+//    }
+
+    function to-background-color(relative-to-color: color) -> color {
+//        return complementary-color(relative-to-color);
+//        return invert-lightness(complementary-color(relative-to-color));
+//        return complementary-color(relative-to-color).brighter(0.5);
+        return complementary-color(relative-to-color).brighter(0.75);
+//        return complementary-color(relative-to-color).brighter(1);
+//        return complementary-color(relative-to-color).brighter(1.25);
+//        return complementary-color(relative-to-color).brighter(1.5);
+//        return complementary-color(relative-to-color).brighter(2);
     }
 }
 

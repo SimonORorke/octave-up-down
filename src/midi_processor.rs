@@ -1,4 +1,5 @@
 use std::sync::{Arc, Mutex};
+use log::{debug, trace};
 use midly::{MidiMessage, live::LiveEvent, num::u7};
 use simonor::{MidiReceiver, MidiSender, SharedMidiSender};
 use crate::{CcNoRangeDefaults, CcNoRangeSetters};
@@ -37,6 +38,7 @@ impl MidiProcessor {
                             if value == 127 {
                                 if self.octave_shift > -3 {
                                     self.octave_shift -= 1;
+                                    debug!("Octave shift: {}", self.octave_shift);
                                 }
                             }
                             None
@@ -45,6 +47,7 @@ impl MidiProcessor {
                             if value == 127 {
                                 if self.octave_shift < 3 {
                                     self.octave_shift += 1;
+                                    debug!("Octave shift: {}", self.octave_shift);
                                 }
                             }
                             None
@@ -64,18 +67,21 @@ impl MidiProcessor {
                     }
                 }
                 MidiMessage::NoteOn { key, vel } => {
+                    debug!("NoteOn: `from key {} to key {}", key, self.transpose_key(key));
                     let new_message =
                         MidiSender::create_note_on(
                             channel1, self.transpose_key(key), u8::from(vel));
                     Some(new_message)
                 }
                 MidiMessage::NoteOff { key, vel } => {
+                    debug!("NoteOff: `from key {} to key {}", key, self.transpose_key(key));
                     let new_message =
                         MidiSender::create_note_off(
                             channel1, self.transpose_key(key), u8::from(vel));
                     Some(new_message)
                 }
                 MidiMessage::Aftertouch { key, vel } => {
+                    debug!("NoteAftertouch: `from key {} to key {}", key, self.transpose_key(key));
                     let new_message =
                         MidiSender::create_note_aftertouch(
                             channel1, self.transpose_key(key), u8::from(vel));

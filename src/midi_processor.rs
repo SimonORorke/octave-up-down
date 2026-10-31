@@ -1,8 +1,25 @@
 use std::sync::{Arc, Mutex};
-use log::{debug, trace};
+// use log::{debug};
+use log::{trace};
 use midly::{MidiMessage, live::LiveEvent, num::u7};
 use simonor::{MidiReceiver, MidiSender, SharedMidiSender};
 use crate::{CcNoRangeDefaults, CcNoRangeSetters};
+
+struct TransposedNote {
+    channel1: u8, // 1-based channel
+    original_key: u8,
+    transposed_key: u8,
+}
+
+impl TransposedNote {
+    pub fn new(channel1: u8, original_key: u8, transposed_key: u8) -> Self {
+        Self {
+            channel1,
+            original_key,
+            transposed_key,
+        }
+    }
+}
 
 pub trait IMidiProcessor: CcNoRangeSetters + MidiReceiver {}
 
@@ -13,6 +30,7 @@ pub struct MidiProcessor {
     out_cc_no: u8,
     octave_shift: i8,
     midi_sender: SharedMidiSender,
+    transposed_notes: Arc<Mutex<Vec<TransposedNote>>>,
 }
 
 impl MidiProcessor {
@@ -24,7 +42,17 @@ impl MidiProcessor {
             out_cc_no: CcNoRangeDefaults::out_cc_no(),
             octave_shift: 0,
             midi_sender,
+            transposed_notes: Arc::new(Mutex::new(vec![])),
         }
+    }
+
+    fn find_and_remove_transposed_note(
+            &self, channel1: u8, original_key: u8) -> Option<TransposedNote> {
+        let mut transposed_notes = self.transposed_notes.lock().unwrap();
+        transposed_notes.iter()
+            .position(|note|
+                note.channel1 == channel1 && note.original_key == original_key)
+            .map(|index| transposed_notes.remove(index))
     }
     
     fn get_message_to_send(&mut self, raw_message: &[u8]) -> Option<Vec<u8>> {
@@ -38,7 +66,7 @@ impl MidiProcessor {
                             if value == 127 {
                                 if self.octave_shift > -3 {
                                     self.octave_shift -= 1;
-                                    debug!("Octave shift: {}", self.octave_shift);
+                                    trace!("Octave shift: {}", self.octave_shift);
                                 }
                             }
                             None
@@ -47,7 +75,7 @@ impl MidiProcessor {
                             if value == 127 {
                                 if self.octave_shift < 3 {
                                     self.octave_shift += 1;
-                                    debug!("Octave shift: {}", self.octave_shift);
+                                    trace!("Octave shift: {}", self.octave_shift);
                                 }
                             }
                             None
@@ -67,21 +95,34 @@ impl MidiProcessor {
                     }
                 }
                 MidiMessage::NoteOn { key, vel } => {
-                    debug!("NoteOn: `from key {} to key {}", key, self.transpose_key(key));
+                    trace!("NoteOn: `from key {} to key {}", key, self.transpose_key(key));
+                    let transposed_key = self.transpose_key(key);
+                    let transposed_note =
+                        TransposedNote::new(channel1, u8::from(key), transposed_key);
+                    self.transposed_notes.lock().unwrap().push(transposed_note);
                     let new_message =
                         MidiSender::create_note_on(
-                            channel1, self.transpose_key(key), u8::from(vel));
+                            channel1, transposed_key, u8::from(vel));
                     Some(new_message)
                 }
                 MidiMessage::NoteOff { key, vel } => {
-                    debug!("NoteOff: `from key {} to key {}", key, self.transpose_key(key));
-                    let new_message =
-                        MidiSender::create_note_off(
-                            channel1, self.transpose_key(key), u8::from(vel));
-                    Some(new_message)
+                    // The octave shift may have changed between the NoteOn and NoteOff messages.
+                    // So we need to set the NoteOff's key to the NoteOn's transposed key,
+                    // which is not necessarily the same as would be calculated from the current
+                    // octave shift.
+                    if let Some(transposed_note) =
+                            self.find_and_remove_transposed_note(channel1, u8::from(key)) {
+                        trace!("NoteOff: `from key {} to key {}", key, transposed_note.transposed_key);
+                        let new_message =
+                            MidiSender::create_note_off(
+                                channel1, transposed_note.transposed_key, u8::from(vel));
+                        Some(new_message)
+                    } else {
+                        None
+                    }
                 }
                 MidiMessage::Aftertouch { key, vel } => {
-                    debug!("NoteAftertouch: `from key {} to key {}", key, self.transpose_key(key));
+                    trace!("NoteAftertouch: `from key {} to key {}", key, self.transpose_key(key));
                     let new_message =
                         MidiSender::create_note_aftertouch(
                             channel1, self.transpose_key(key), u8::from(vel));
@@ -260,6 +301,25 @@ mod tests {
         assert_that!(mock_midi_sender().note_on_count, eq(5));
         assert_that!(mock_midi_sender().note_on_key, eq(96));
         assert_that!(mock_midi_sender().note_on_vel, eq(65));
+    }
+
+    #[googletest::gtest]
+    fn test_octave_shift_between_note_on_and_note_off() {
+        let _guard = test_mutex_guard();
+        let mut midi_processor =
+            MidiProcessor::new(Arc::new(Mutex::new(MockMidiSender::new())));
+        // Up 1 octave
+        on_up(&mut midi_processor);
+        on_note_on(&mut midi_processor, 60, 61);
+        assert_that!(mock_midi_sender().note_on_key, eq(72));
+        assert_that!(mock_midi_sender().note_on_vel, eq(61));
+        // Up 2 octaves
+        on_up(&mut midi_processor);
+        on_note_off(&mut midi_processor, 60, 62);
+        // Confirm that the NoteOff's key has been transposed to the NoteOn's transposed key,
+        // which is not the same as would be calculated from the new octave shift.
+        assert_that!(mock_midi_sender().note_off_key, eq(72));
+        assert_that!(mock_midi_sender().note_off_vel, eq(62));
     }
 
     #[googletest::gtest]

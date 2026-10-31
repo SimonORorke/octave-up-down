@@ -8,7 +8,8 @@ pub mod ui_methods;
 
 pub use cc_no_ranges::{CcNoRangeDefaults, CcNoRangeGetters, CcNoRangeSetters};
 pub use midi_processor::{IMidiProcessor, MidiProcessor, SharedMidiProcessor};
-pub use presenter::{NewVersionCallbacks, NewVersionCallbacksWrapper, Presenter, SharedPresenter};
+pub use presenter::{NewVersionCallbacks, NewVersionCallbacksWrapper, OctaveShiftListener,
+                    Presenter, SharedPresenter};
 pub use presentation::Presentation;
 pub use settings::{ISettings, Settings};
 pub use ui_device_strategy::{UiDeviceStrategy, UiInputStrategy, UiOutputStrategy};

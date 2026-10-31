@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::sync::{Arc, Mutex, Weak};
-//use log::{debug};
+// use log::{debug};
 use log::{trace};
 use simonor::{IMidiHub, IMidiSender, MidiHub, MidiSender, ReleaseInfo,
               SharedMidiHub, SharedMidiSender, SharedReleaseInfo, SharedOutput, VersionChecker};
@@ -49,6 +49,8 @@ impl Presenter {
     pub fn init(&mut self, self_arc: &SharedPresenter) {
         trace!("init");
         self.presenter_weak = Arc::downgrade(self_arc);
+        let listener: Arc<dyn OctaveShiftListener> = self_arc.clone();
+        self.midi_processor.lock().unwrap().set_listener(Arc::downgrade(&listener));
         let auto_check_new_versions: bool;
         let ignore_version: String;
         let main_window_x: i32;
@@ -256,6 +258,9 @@ impl Presenter {
         self.midi_processor.lock().unwrap().set_out_cc_no(value);
         self.settings.set_out_cc_no(value);
     }
+    fn on_octave_shift_changed(&mut self, info_message: String) {
+        self.presentation.show_info(info_message);
+    }
 }
 
 pub trait NewVersionCallbacks : Send + Sync {
@@ -290,6 +295,16 @@ impl NewVersionCallbacks for NewVersionCallbacksWrapper {
         if let Some(presenter) = self.0.upgrade() {
             presenter.lock().unwrap().on_ignore_this_version(new_version);
         }
+    }
+}
+
+pub trait OctaveShiftListener: Send + Sync {
+    fn on_octave_shift_changed(&self, info_message: String);
+}
+
+impl OctaveShiftListener for Mutex<Presenter> {
+    fn on_octave_shift_changed(&self, info_message: String) {
+        self.lock().unwrap().on_octave_shift_changed(info_message);
     }
 }
 

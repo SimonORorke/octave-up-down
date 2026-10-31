@@ -1,9 +1,9 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, Weak};
 // use log::{debug};
 use log::{trace};
 use midly::{MidiMessage, live::LiveEvent, num::u7};
 use simonor::{MidiReceiver, MidiSender, SharedMidiSender};
-use crate::{CcNoRangeDefaults, CcNoRangeSetters};
+use crate::{CcNoRangeDefaults, CcNoRangeSetters, OctaveShiftListener};
 
 struct TransposedNote {
     channel1: u8, // 1-based channel
@@ -21,9 +21,16 @@ impl TransposedNote {
     }
 }
 
-pub trait IMidiProcessor: CcNoRangeSetters + MidiReceiver {}
+pub trait IMidiProcessor: CcNoRangeSetters + MidiReceiver {
+    /// Records the (weak) semantic listener the processor raises events to. Weak to avoid a
+    /// reference cycle, mirroring the `Presenter`'s `presenter_weak`. Set by `Presenter::init`.
+    fn set_listener<'a>(&self, listener: Weak<dyn OctaveShiftListener>);
+}
 
 pub struct MidiProcessor {
+    /// The semantic listener (the `Presenter`). Weak to avoid a reference cycle; set by
+    /// `Presenter::init`.
+    listener: Mutex<Option<Weak<dyn OctaveShiftListener>>>,
     down_cc_no: u8,
     up_cc_no: u8,
     in_cc_no: u8,
@@ -36,6 +43,7 @@ pub struct MidiProcessor {
 impl MidiProcessor {
     pub fn new(midi_sender: SharedMidiSender) -> Self {
         Self {
+            listener: Mutex::new(None),
             down_cc_no: CcNoRangeDefaults::down_cc_no(),
             up_cc_no: CcNoRangeDefaults::up_cc_no(),
             in_cc_no: CcNoRangeDefaults::in_cc_no(),
@@ -66,7 +74,7 @@ impl MidiProcessor {
                             if value == 127 {
                                 if self.octave_shift > -3 {
                                     self.octave_shift -= 1;
-                                    trace!("Octave shift: {}", self.octave_shift);
+                                    self.on_octave_shift_changed();
                                 }
                             }
                             None
@@ -75,7 +83,7 @@ impl MidiProcessor {
                             if value == 127 {
                                 if self.octave_shift < 3 {
                                     self.octave_shift += 1;
-                                    trace!("Octave shift: {}", self.octave_shift);
+                                    self.on_octave_shift_changed();
                                 }
                             }
                             None
@@ -139,6 +147,34 @@ impl MidiProcessor {
         }
     }
 
+    /// The semantic listener, if it is still alive..
+    fn listener(&self) -> Option<Arc<dyn OctaveShiftListener>> {
+        self.listener.lock().unwrap().as_ref().and_then(
+            |weak| weak.upgrade())
+    }
+
+    fn on_octave_shift_changed(&self) {
+        // Prefix the octave shift value with a plus or minus sign unless 0.
+        let octave_shift_text =
+            if self.octave_shift == 0 {
+                "0".to_string()
+            } else {
+                format!("{}{}",
+                        if self.octave_shift > 0 {
+                            "+"
+                        } else {
+                            "-"
+                        },
+                        self.octave_shift.abs())
+            };
+        let info_message = format!("Octave shift: {}", octave_shift_text);
+        trace!("on_octave_shift_changed: {}", info_message);
+        if let Some(listener) = self.listener() {
+            // let octave_shift = self.octave_shift;
+            rayon::spawn(move || listener.on_octave_shift_changed(info_message));
+        }
+    }
+
     fn transpose_key(&self, in_key: u7) -> u8 {
         let mut transposed: i16 =
             i16::from(u8::from(in_key)) + i16::from(self.octave_shift * 12);
@@ -152,7 +188,11 @@ impl MidiProcessor {
     }
 }
 
-impl IMidiProcessor for MidiProcessor {}
+impl IMidiProcessor for MidiProcessor {
+    fn set_listener(&self, listener: Weak<dyn OctaveShiftListener>) {
+        *self.listener.lock().unwrap() = Some(listener);
+    }
+}
 
 impl CcNoRangeSetters for MidiProcessor {
     fn set_down_cc_no(&mut self, value: u8) {

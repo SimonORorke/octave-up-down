@@ -202,7 +202,6 @@ impl MidiProcessor {
         let info_message = format!("Octave shift: {}", octave_shift_text);
         trace!("on_octave_shift_changed: {}", info_message);
         if let Some(listener) = self.listener() {
-            // let octave_shift = self.octave_shift;
             rayon::spawn(move || listener.on_octave_shift_changed(info_message));
         }
     }
@@ -260,13 +259,72 @@ pub type SharedMidiProcessor = Arc<Mutex<Box<dyn IMidiProcessor>>>;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::{Arc, Mutex, MutexGuard};
+    use std::sync::{MutexGuard};
     use googletest::assert_that;
     use googletest::matchers::eq;
     use simonor::MidiSender;
     use simonor::testing::{mock_midi_sender, MockMidiSender};
 
     static TEST_MUTEX: Mutex<()> = Mutex::new(());
+
+    static INFO_MESSAGE: Mutex<String> = Mutex::new(String::new());
+
+    pub fn info_message() -> String {
+        INFO_MESSAGE.lock().unwrap().clone()
+    }
+
+    pub fn reset_info_message() {
+        INFO_MESSAGE.lock().unwrap().clear();
+    }
+
+    pub fn wait_for_info_message() -> String {
+        use std::time::{Duration, Instant};
+        let start = Instant::now();
+        loop {
+            let message = info_message();
+            if !message.is_empty() || start.elapsed() > Duration::from_secs(5) {
+                return message;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+    }
+
+    struct MockListener {}
+
+    impl MockListener {
+        fn new() -> Self { MockListener {} }
+    }
+
+    impl OctaveShiftListener for MockListener {
+        fn on_octave_shift_changed(&self, info_message: String) {
+            let mut info_message_guard = INFO_MESSAGE.lock().unwrap();
+            *info_message_guard = info_message;
+        }
+    }
+
+    impl OctaveShiftListener for Mutex<MockListener> {
+        fn on_octave_shift_changed(&self, info_message: String) {
+            self.lock().unwrap().on_octave_shift_changed(info_message);
+        }
+    }
+
+    #[googletest::gtest]
+    fn test_octave_shift_changed_message() {
+        let _guard = test_mutex_guard();
+        let mut midi_processor =
+            MidiProcessor::new(Arc::new(Mutex::new(MockMidiSender::new())));
+        let mock_listener: Arc<dyn OctaveShiftListener> = Arc::new(MockListener::new());
+        midi_processor.set_listener(Arc::downgrade(&mock_listener));
+        reset_info_message();
+        on_down(&mut midi_processor); // Down 1 octave
+        assert_that!(wait_for_info_message(), eq("Octave shift: -1"));
+        reset_info_message();
+        on_up(&mut midi_processor); // Back to no shift
+        assert_that!(wait_for_info_message(), eq("Octave shift: 0"));
+        reset_info_message();
+        on_up(&mut midi_processor); // Up 1 octave
+        assert_that!(wait_for_info_message(), eq("Octave shift: +1"));
+    }
 
     #[googletest::gtest]
     fn test_down() {

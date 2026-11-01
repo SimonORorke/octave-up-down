@@ -258,9 +258,6 @@ impl Presenter {
         self.midi_processor.lock().unwrap().set_out_cc_no(value);
         self.settings.set_out_cc_no(value);
     }
-    fn on_octave_shift_changed(&mut self, info_message: String) {
-        self.presentation.show_info(info_message);
-    }
 }
 
 pub trait NewVersionCallbacks : Send + Sync {
@@ -300,6 +297,12 @@ impl NewVersionCallbacks for NewVersionCallbacksWrapper {
 
 pub trait OctaveShiftListener: Send + Sync {
     fn on_octave_shift_changed(&self, info_message: String);
+}
+
+impl OctaveShiftListener for Presenter {
+    fn on_octave_shift_changed(&self, info_message: String) {
+        self.presentation.show_info(info_message);
+    }
 }
 
 impl OctaveShiftListener for Mutex<Presenter> {

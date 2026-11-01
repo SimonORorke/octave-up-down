@@ -5,6 +5,7 @@ use midly::{MidiMessage, live::LiveEvent, num::u7};
 use simonor::{MidiReceiver, MidiSender, SharedMidiSender};
 use crate::{CcNoRangeDefaults, CcNoRangeSetters, OctaveShiftListener};
 
+#[derive(Copy, Clone)]
 struct TransposedNote {
     channel1: u8, // 1-based channel
     original_key: u8,
@@ -62,7 +63,16 @@ impl MidiProcessor {
                 note.channel1 == channel1 && note.original_key == original_key)
             .map(|index| transposed_notes.remove(index))
     }
-    
+
+    fn find_transposed_note(
+        &self, channel1: u8, original_key: u8) -> Option<TransposedNote> {
+        let transposed_notes = self.transposed_notes.lock().unwrap();
+        transposed_notes.iter()
+            .find(|note|
+                note.channel1 == channel1 && note.original_key == original_key)
+            .copied()
+    }
+
     fn get_message_to_send(&mut self, raw_message: &[u8]) -> Option<Vec<u8>> {
         let event = LiveEvent::parse(raw_message).unwrap();
         if let LiveEvent::Midi { channel, message } = event {
@@ -103,8 +113,13 @@ impl MidiProcessor {
                     }
                 }
                 MidiMessage::NoteOn { key, vel } => {
-                    trace!("NoteOn: `from key {} to key {}", key, self.transpose_key(key));
-                    let transposed_key = self.transpose_key(key);
+                    let transposed_key_opt = self.transpose_key(key);
+                    // Don't play note if transposition would be out of range.
+                    if transposed_key_opt.is_none() {
+                        return None;
+                    }
+                    let transposed_key = transposed_key_opt.unwrap();
+                    trace!("NoteOn: `from key {} to key {}", key, transposed_key);
                     let transposed_note =
                         TransposedNote::new(channel1, u8::from(key), transposed_key);
                     self.transposed_notes.lock().unwrap().push(transposed_note);
@@ -115,7 +130,10 @@ impl MidiProcessor {
                 }
                 MidiMessage::NoteOff { key, vel } => {
                     // The octave shift may have changed between the NoteOn and NoteOff messages.
-                    // So we need to set the NoteOff's key to the NoteOn's transposed key,
+                    // Or the transposition may have been out of range, in which case the note
+                    // won't be playing.
+                    // So,if the note is playing,
+                    // we need to set the NoteOff's key to the NoteOn's transposed key,
                     // which is not necessarily the same as would be calculated from the current
                     // octave shift.
                     if let Some(transposed_note) =
@@ -125,16 +143,30 @@ impl MidiProcessor {
                             MidiSender::create_note_off(
                                 channel1, transposed_note.transposed_key, u8::from(vel));
                         Some(new_message)
-                    } else {
+                    } else { // The note isn't playing.
                         None
                     }
                 }
                 MidiMessage::Aftertouch { key, vel } => {
-                    trace!("NoteAftertouch: `from key {} to key {}", key, self.transpose_key(key));
-                    let new_message =
-                        MidiSender::create_note_aftertouch(
-                            channel1, self.transpose_key(key), u8::from(vel));
-                    Some(new_message)
+                    // The octave shift may have changed between the NoteOn and NoteAftertouch
+                    // messages.
+                    // Or the transposition may have been out of range, in which case the note
+                    // won't be playing.
+                    // So,if the note is playing,
+                    // we need to set the NoteOff's key to the NoteOn's transposed key,
+                    // So we need to set the NoteAftertouch's key to the NoteOn's transposed key,
+                    // which is not necessarily the same as would be calculated from the current
+                    // octave shift.
+                    if let Some(transposed_note) =
+                        self.find_transposed_note(channel1, u8::from(key)) {
+                        trace!("NoteAftertouch: `from key {} to key {}", key, transposed_note.transposed_key);
+                        let new_message =
+                            MidiSender::create_note_aftertouch(
+                                channel1, transposed_note.transposed_key, u8::from(vel));
+                        Some(new_message)
+                    } else { // The note isn't playing.
+                        None
+                    }
                 }
                 _ => {
                     Some(raw_message.to_vec())
@@ -175,16 +207,15 @@ impl MidiProcessor {
         }
     }
 
-    fn transpose_key(&self, in_key: u7) -> u8 {
-        let mut transposed: i16 =
+    /// Transpose a key by the octave shift value, returning the transposed key or,
+    /// if that would be out of range, None.
+    fn transpose_key(&self, in_key: u7) -> Option<u8>  {
+        let transposed: i16 =
             i16::from(u8::from(in_key)) + i16::from(self.octave_shift * 12);
-        while transposed < 0 {
-            transposed += 12;
+        if transposed < 0 || transposed > 127 {
+            return None;
         }
-        while transposed > 127 {
-            transposed -= 12;
-        }
-        transposed as u8
+        Some(transposed as u8)
     }
 }
 
@@ -247,14 +278,14 @@ mod tests {
         assert_that!(mock_midi_sender().note_on_count, eq(1));
         assert_that!(mock_midi_sender().note_on_key, eq(60));
         assert_that!(mock_midi_sender().note_on_vel, eq(61));
-        on_note_off(&mut midi_processor, 60, 71);
-        assert_that!(mock_midi_sender().note_off_count, eq(1));
-        assert_that!(mock_midi_sender().note_off_key, eq(60));
-        assert_that!(mock_midi_sender().note_off_vel, eq(71));
         on_note_aftertouch(&mut midi_processor, 60, 81);
         assert_that!(mock_midi_sender().note_aftertouch_count, eq(1));
         assert_that!(mock_midi_sender().note_aftertouch_key, eq(60));
         assert_that!(mock_midi_sender().note_aftertouch_vel, eq(81));
+        on_note_off(&mut midi_processor, 60, 71);
+        assert_that!(mock_midi_sender().note_off_count, eq(1));
+        assert_that!(mock_midi_sender().note_off_key, eq(60));
+        assert_that!(mock_midi_sender().note_off_vel, eq(71));
         // Down 1 octave
         on_down(&mut midi_processor);
         assert_that!(mock_midi_sender().control_change_count, eq(0));
@@ -262,14 +293,14 @@ mod tests {
         assert_that!(mock_midi_sender().note_on_count, eq(2));
         assert_that!(mock_midi_sender().note_on_key, eq(48));
         assert_that!(mock_midi_sender().note_on_vel, eq(62));
-        on_note_off(&mut midi_processor, 60, 72);
-        assert_that!(mock_midi_sender().note_off_count, eq(2));
-        assert_that!(mock_midi_sender().note_off_key, eq(48));
-        assert_that!(mock_midi_sender().note_off_vel, eq(72));
         on_note_aftertouch(&mut midi_processor, 60, 82);
         assert_that!(mock_midi_sender().note_aftertouch_count, eq(2));
         assert_that!(mock_midi_sender().note_aftertouch_key, eq(48));
         assert_that!(mock_midi_sender().note_aftertouch_vel, eq(82));
+        on_note_off(&mut midi_processor, 60, 72);
+        assert_that!(mock_midi_sender().note_off_count, eq(2));
+        assert_that!(mock_midi_sender().note_off_key, eq(48));
+        assert_that!(mock_midi_sender().note_off_vel, eq(72));
         // Down 2 octaves
         on_down(&mut midi_processor);
         on_note_on(&mut midi_processor, 60, 63);
@@ -300,14 +331,14 @@ mod tests {
         assert_that!(mock_midi_sender().note_on_count, eq(1));
         assert_that!(mock_midi_sender().note_on_key, eq(60));
         assert_that!(mock_midi_sender().note_on_vel, eq(61));
-        on_note_off(&mut midi_processor, 60, 71);
-        assert_that!(mock_midi_sender().note_off_count, eq(1));
-        assert_that!(mock_midi_sender().note_off_key, eq(60));
-        assert_that!(mock_midi_sender().note_off_vel, eq(71));
         on_note_aftertouch(&mut midi_processor, 60, 81);
         assert_that!(mock_midi_sender().note_aftertouch_count, eq(1));
         assert_that!(mock_midi_sender().note_aftertouch_key, eq(60));
         assert_that!(mock_midi_sender().note_aftertouch_vel, eq(81));
+        on_note_off(&mut midi_processor, 60, 71);
+        assert_that!(mock_midi_sender().note_off_count, eq(1));
+        assert_that!(mock_midi_sender().note_off_key, eq(60));
+        assert_that!(mock_midi_sender().note_off_vel, eq(71));
         // Up 1 octave
         on_up(&mut midi_processor);
         assert_that!(mock_midi_sender().control_change_count, eq(0));
@@ -315,14 +346,14 @@ mod tests {
         assert_that!(mock_midi_sender().note_on_count, eq(2));
         assert_that!(mock_midi_sender().note_on_key, eq(72));
         assert_that!(mock_midi_sender().note_on_vel, eq(62));
-        on_note_off(&mut midi_processor, 60, 72);
-        assert_that!(mock_midi_sender().note_off_count, eq(2));
-        assert_that!(mock_midi_sender().note_off_key, eq(72));
-        assert_that!(mock_midi_sender().note_off_vel, eq(72));
         on_note_aftertouch(&mut midi_processor, 60, 82);
         assert_that!(mock_midi_sender().note_aftertouch_count, eq(2));
         assert_that!(mock_midi_sender().note_aftertouch_key, eq(72));
         assert_that!(mock_midi_sender().note_aftertouch_vel, eq(82));
+        on_note_off(&mut midi_processor, 60, 72);
+        assert_that!(mock_midi_sender().note_off_count, eq(2));
+        assert_that!(mock_midi_sender().note_off_key, eq(72));
+        assert_that!(mock_midi_sender().note_off_vel, eq(72));
         // Up 2 octaves
         on_up(&mut midi_processor);
         on_note_on(&mut midi_processor, 60, 63);
@@ -369,9 +400,7 @@ mod tests {
             MidiProcessor::new(Arc::new(Mutex::new(MockMidiSender::new())));
         on_down(&mut midi_processor);
         on_note_on(&mut midi_processor, 11, 62);
-        assert_that!(mock_midi_sender().note_on_count, eq(1));
-        assert_that!(mock_midi_sender().note_on_key, eq(11));
-        assert_that!(mock_midi_sender().note_on_vel, eq(62));
+        assert_that!(mock_midi_sender().note_on_count, eq(0));
     }
 
     #[googletest::gtest]
@@ -381,9 +410,7 @@ mod tests {
             MidiProcessor::new(Arc::new(Mutex::new(MockMidiSender::new())));
         on_up(&mut midi_processor);
         on_note_on(&mut midi_processor, 116, 62);
-        assert_that!(mock_midi_sender().note_on_count, eq(1));
-        assert_that!(mock_midi_sender().note_on_key, eq(116));
-        assert_that!(mock_midi_sender().note_on_vel, eq(62));
+        assert_that!(mock_midi_sender().note_on_count, eq(0));
     }
 
     #[googletest::gtest]

@@ -1,5 +1,6 @@
 use std::error::Error;
-use log::{debug, trace};
+// use log::{debug};
+use log::{trace};
 use serde::{Serialize, Deserialize};
 use simonor::{MidiDesktopSettings, PathFinder, SettingsFileIo};
 use app_info::APP_TITLE;

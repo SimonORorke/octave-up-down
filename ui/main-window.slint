@@ -1,6 +1,7 @@
 import { Palette, VerticalBox, } from "std-widgets.slint";
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
-import { UButton, UCard, UInputNumber, UText } from "@sleek-ui/widgets.slint";
+import { IconTextPlacement, UButtonVariant } from "@sleek-ui/common.slint";
+import { UButton, UIconButton, UCard, UInputNumber, UText } from "@sleek-ui/widgets.slint";
 import { Globals, SlintMessageType } from "globals.slint";
 import { Alert } from "components/alert.slint";
 import { CcNoRange } from "components/cc.slint";
@@ -111,15 +112,43 @@ export component MainWindow inherits Window {
         }
         status-bar-layout := HorizontalLayout {
             icon-layout := HorizontalLayout {
-                padding-top: UAppTheme.padding-medium;
+                padding_top: UAppTheme.padding-medium;
+                padding-bottom: UAppTheme.padding-medium;
                 icon-image := Image {
                     source: Globals.icon;
-                    width: 40px; height: 40px;
+                    width: 40px; height: 40px; // Default height for menu_button.
                 }
             }
-            status-message-box := VerticalBox {
+            alert-box := VerticalBox {
                 alert := Alert {
                     message: @markdown("Radbod, King of the Frisians, is such a rad bod!");
+                }
+            }
+            menu_layout := HorizontalLayout {
+                  padding_right: UAppTheme.padding-medium;
+                  padding_top: UAppTheme.padding-medium;
+                  padding-bottom: UAppTheme.padding-medium;
+                // If I tab through the main window to focus the menu button and then press
+                // Enter to open the menu, when I exit the menu, pressing enter again does not
+                // reopen the menu, even though the menu button is still focused.
+                // I need to tab away from the menu button and then tab back to it for Enter
+                // to work again. But this is almost certainly just normal behaviour for
+                // Slint buttons: Slint's internal focus state for the button's own FocusScope
+                // isn't properly re-activated by programmatic focus() calls, only by tab
+                // navigation.
+                // See also comment for MidiConnection.show-focus-highlight.
+                menu_button := UIconButton {
+                    icon: @image-url("images/menu-svgrepo-com.svg");
+                    width: 50px;
+                    clicked => {
+//                        debug("MainWindow.menu_button.height: " + self.height / 1px);
+//                        debug("MainWindow.icon-image.width: " + icon-image.width / 1px);
+//                        debug("MainWindow.icon-image.height: " + icon-image.height / 1px);
+//                        main_menu.show({
+//                            x: self.absolute-position.x,
+//                            y: self.absolute-position.y + self.height
+//                        })
+                    }
                 }
             }
         }

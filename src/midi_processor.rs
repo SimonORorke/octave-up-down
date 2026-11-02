@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex, Weak};
 // use log::{debug};
 use log::{trace};
 use midly::{MidiMessage, live::LiveEvent, num::u7};
-use simonor::{MidiReceiver, MidiSender, SharedMidiSender};
+use simonor::{ListenerSlot, MidiReceiver, MidiSender, SharedMidiSender};
 use crate::{CcNoRangeDefaults, CcNoRangeSetters, OctaveShiftListener};
 
 #[derive(Copy, Clone)]
@@ -31,7 +31,7 @@ pub trait IMidiProcessor: CcNoRangeSetters + MidiReceiver {
 pub struct MidiProcessor {
     /// The semantic listener (the `Presenter`). Weak to avoid a reference cycle; set by
     /// `Presenter::init`.
-    listener: Mutex<Option<Weak<dyn OctaveShiftListener>>>,
+    listener: ListenerSlot<dyn OctaveShiftListener>,
     down_cc_no: u8,
     up_cc_no: u8,
     in_cc_no: u8,
@@ -44,7 +44,7 @@ pub struct MidiProcessor {
 impl MidiProcessor {
     pub fn new(midi_sender: SharedMidiSender) -> Self {
         Self {
-            listener: Mutex::new(None),
+            listener: ListenerSlot::new(),
             down_cc_no: CcNoRangeDefaults::down_cc_no(),
             up_cc_no: CcNoRangeDefaults::up_cc_no(),
             in_cc_no: CcNoRangeDefaults::in_cc_no(),
@@ -179,12 +179,6 @@ impl MidiProcessor {
         }
     }
 
-    /// The semantic listener, if it is still alive.
-    fn listener(&self) -> Option<Arc<dyn OctaveShiftListener>> {
-        self.listener.lock().unwrap().as_ref().and_then(
-            |weak| weak.upgrade())
-    }
-
     fn on_octave_shift_changed(&self) {
         // Prefix the octave shift value with a plus or minus sign unless 0.
         let octave_shift_text =
@@ -201,9 +195,7 @@ impl MidiProcessor {
             };
         let info_message = format!("Octave shift: {}", octave_shift_text);
         trace!("on_octave_shift_changed: {}", info_message);
-        if let Some(listener) = self.listener() {
-            rayon::spawn(move || listener.on_octave_shift_changed(info_message));
-        }
+        self.listener.notify(move |listener| listener.on_octave_shift_changed(info_message));
     }
 
     /// Transpose a key by the octave shift value, returning the transposed key or,
@@ -220,7 +212,7 @@ impl MidiProcessor {
 
 impl IMidiProcessor for MidiProcessor {
     fn set_listener(&self, listener: Weak<dyn OctaveShiftListener>) {
-        *self.listener.lock().unwrap() = Some(listener);
+        self.listener.set(listener);
     }
 }
 
@@ -302,11 +294,9 @@ mod tests {
         }
     }
 
-    impl OctaveShiftListener for Mutex<MockListener> {
-        fn on_octave_shift_changed(&self, info_message: String) {
-            self.lock().unwrap().on_octave_shift_changed(info_message);
-        }
-    }
+    simonor::impl_mutex_listener!(OctaveShiftListener for MockListener {
+        fn on_octave_shift_changed(&self, info_message: String);
+    });
 
     #[googletest::gtest]
     fn test_octave_shift_changed_message() {

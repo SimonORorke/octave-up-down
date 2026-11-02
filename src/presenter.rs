@@ -305,10 +305,8 @@ impl OctaveShiftListener for Presenter {
     }
 }
 
-impl OctaveShiftListener for Mutex<Presenter> {
-    fn on_octave_shift_changed(&self, info_message: String) {
-        self.lock().unwrap().on_octave_shift_changed(info_message);
-    }
-}
+simonor::impl_mutex_listener!(OctaveShiftListener for Presenter {
+    fn on_octave_shift_changed(&self, info_message: String);
+});
 
 pub type SharedPresenter = Arc<Mutex<Presenter>>;

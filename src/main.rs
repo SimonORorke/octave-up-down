@@ -179,6 +179,39 @@ fn init_ui_handlers(main_window: &MainWindow,
                 &presenter, move |c| c.set_out_cc_no(value as u8));
         });
     }
+    // Menu item callbacks
+    {
+        // let presenter: SharedPresenter = Arc::clone(&presenter);
+        main_window.on_check_for_updates(move || {
+            debug!("Checking for updates");
+            // spawn_presenter_action(
+            //     &presenter, move |c| c.set_out_cc_no(value as u8));
+        });
+    }
+    {
+        // let presenter: SharedPresenter = Arc::clone(&presenter);
+        main_window.on_open_documentation(move || {
+            debug!("Opening documentation");
+            // spawn_presenter_action(
+            //     &presenter, move |c| c.set_out_cc_no(value as u8));
+        });
+    }
+    {
+        // let presenter: SharedPresenter = Arc::clone(&presenter);
+        main_window.on_show_about_window(move || {
+            debug!("Showing About window");
+            // spawn_presenter_action(
+            //     &presenter, move |c| c.set_out_cc_no(value as u8));
+        });
+    }
+    {
+        // let presenter: SharedPresenter = Arc::clone(&presenter);
+        main_window.on_show_colour_scheme_window(move || {
+            debug!("Showing Colour Scheme window");
+            // spawn_presenter_action(
+            //     &presenter, move |c| c.set_out_cc_no(value as u8));
+        });
+    }
 }
 
 fn perform_close<'a>(

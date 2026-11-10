@@ -5,6 +5,7 @@ import { Globals, SlintMessageType } from "globals.slint";
 import { Alert } from "components/alert.slint";
 import { CcNoRange } from "components/cc.slint";
 import { MidiDevices, SlintDeviceType } from "components/midi-devices.slint";
+import { PopupMenu } from "components/popup_menu.slint";
 
 export { SlintDeviceType }
 
@@ -34,122 +35,140 @@ export component MainWindow inherits Window {
     background: Globals.window_background;
     min-width: 700px;
     preferred-height: 325px; // Min height expands automatically so everything fits;
-    title: window-title;
+    title: window_title;
     icon: Globals.icon;
 
-    in property <string> window-title;
-    in property <int> down-cc-no;
-    callback down-cc-no-changed(value: int);
-    in property <int> up-cc-no;
-    callback up-cc-no-changed(value: int);
-    in property <int> in-cc-no;
-    callback in-cc-no-changed(value: int);
-    in property <int> out-cc-no;
-    callback out-cc-no-changed(value: int);
+    in property <string> window_title;
+    in property <int> down_cc_no;
+    callback down_cc_no_changed(value: int);
+    in property <int> up_cc_no;
+    callback up_cc_no_changed(value: int);
+    in property <int> in_cc_no;
+    callback in_cc_no_changed(value: int);
+    in property <int> out_cc_no;
+    callback out_cc_no_changed(value: int);
 
-    callback connect-device(device-type: SlintDeviceType);
-    callback refresh-devices(device-type: SlintDeviceType);
+    callback connect_device(device_type: SlintDeviceType);
+    callback refresh_devices(device_type: SlintDeviceType);
 
-    public function show-message(message: string, message-type: SlintMessageType) {
+    // Menu item callbacks
+    callback check_for_updates();
+    callback open_documentation();
+    callback show_about_window();
+    callback show_colour_scheme_window();
+
+    public function show_message(message: string, message_type: SlintMessageType) {
         alert.message = @markdown("\{message}");
-        alert.message-type = message-type;
+        alert.message_type = message_type;
     }
 
-    in-out property input-devices-model <=> midi-devices.input-devices-model;
-    in-out property <int> input-selected-device-index <=> midi-devices.input-selected-device-index;
-    public function input-focus() {
-        midi-devices.input-focus();
+    in_out property input_devices_model <=> midi_devices.input_devices_model;
+    in_out property <int> input_selected_device_index <=> midi_devices.input_selected_device_index;
+    public function input_focus() {
+        midi_devices.input_focus();
     }
-    public function input-show-connected-device-name(name: string, message-type: SlintMessageType) {
-        midi-devices.input-show-connected-device-name(name, message-type);
+    public function input_show_connected_device_name(name: string, message_type: SlintMessageType) {
+        midi_devices.input_show_connected_device_name(name, message_type);
     }
 
-    in-out property output-devices-model <=> midi-devices.output-devices-model;
-    in-out property <int> output-selected-device-index <=> midi-devices.output-selected-device-index;
-    public function output-focus() {
-        midi-devices.output-focus();
+    in_out property output_devices_model <=> midi_devices.output_devices_model;
+    in_out property <int> output_selected_device_index <=> midi_devices.output_selected_device_index;
+    public function output_focus() {
+        midi_devices.output_focus();
     }
-    public function output-show-connected-device-name(name: string, message-type: SlintMessageType) {
-        midi-devices.output-show-connected-device-name(name, message-type);
+    public function output_show_connected_device_name(name: string, message_type: SlintMessageType) {
+        midi_devices.output_show_connected_device_name(name, message_type);
     }
 
 	VerticalLayout {
         alignment: start; // Stops spreading out when window lenghthened.
-        padding-left: UAppTheme.padding-medium;
-        down-up-range := CcNoRange {
-            from-title: "Down CC No";
-            from-cc-no: root.down-cc-no;
-            from-cc-no-changed(value) => {
-//                debug("MainWindow.down-up-range.from-cc-no-changed: " + value);
-                root.down-cc-no-changed(value);
+        padding_left: UAppTheme.padding_medium;
+        down_up_range := CcNoRange {
+            from_title: "Down CC No";
+            from_cc_no: root.down_cc_no;
+            from_cc_no_changed(value) => {
+//                debug("MainWindow.down_up_range.from_cc_no_changed: " + value);
+                root.down_cc_no_changed(value);
             }
-            to-title: "Up CC No";
-            to-cc-no: root.up-cc-no;
-            to-cc-no-changed(value) => {
-                root.up-cc-no-changed(value);
-            }
-        }
-        in-out-range := CcNoRange {
-            from-title: "In CC No";
-            from-cc-no: root.in-cc-no;
-            from-cc-no-changed(value) => {
-                root.in-cc-no-changed(value);
-            }
-            to-title: "Out CC No";
-            to-cc-no: root.out-cc-no;
-            to-cc-no-changed(value) => {
-                root.out-cc-no-changed(value);
+            to_title: "Up CC No";
+            to_cc_no: root.up_cc_no;
+            to_cc_no_changed(value) => {
+                root.up_cc_no_changed(value);
             }
         }
-        midi-devices := MidiDevices {
-            connect-device(device-type) => {
-                root.connect-device(device-type)
+        in_out_range := CcNoRange {
+            from_title: "In CC No";
+            from_cc_no: root.in_cc_no;
+            from_cc_no_changed(value) => {
+                root.in_cc_no_changed(value);
             }
-            refresh-devices(device-type) => {
-                root.refresh-devices(device-type)
+            to_title: "Out CC No";
+            to_cc_no: root.out_cc_no;
+            to_cc_no_changed(value) => {
+                root.out_cc_no_changed(value);
             }
         }
-        status-bar-layout := HorizontalLayout {
-            icon-layout := HorizontalLayout {
-                padding_top: UAppTheme.padding-medium;
-                padding-bottom: UAppTheme.padding-medium;
-                icon-image := Image {
+        midi_devices := MidiDevices {
+            connect_device(device_type) => {
+                root.connect_device(device_type)
+            }
+            refresh_devices(device_type) => {
+                root.refresh_devices(device_type)
+            }
+        }
+        status_bar_layout := HorizontalLayout {
+            icon_layout := HorizontalLayout {
+                padding_top: UAppTheme.padding_medium;
+                padding_bottom: UAppTheme.padding_medium;
+                icon_image := Image {
                     source: Globals.icon;
                     width: 40px; height: 40px; // Default height for menu_button.
                 }
             }
-            alert-box := VerticalBox {
+            alert_box := VerticalBox {
                 alert := Alert {
                     message: @markdown("Radbod, King of the Frisians, is such a rad bod!");
                 }
             }
             menu_layout := HorizontalLayout {
-                  padding_right: UAppTheme.padding-medium;
-                  padding_top: UAppTheme.padding-medium;
-                  padding-bottom: UAppTheme.padding-medium;
+                  padding_right: UAppTheme.padding_medium;
+                  padding_top: UAppTheme.padding_medium;
+                  padding_bottom: UAppTheme.padding_medium;
                 // If I tab through the main window to focus the menu button and then press
                 // Enter to open the menu, when I exit the menu, pressing enter again does not
                 // reopen the menu, even though the menu button is still focused.
                 // I need to tab away from the menu button and then tab back to it for Enter
                 // to work again. But this is almost certainly just normal behaviour for
                 // Slint buttons: Slint's internal focus state for the button's own FocusScope
-                // isn't properly re-activated by programmatic focus() calls, only by tab
+                // isn't properly re_activated by programmatic focus() calls, only by tab
                 // navigation.
-                // See also comment for MidiConnection.show-focus-highlight.
+                // See also comment for MidiConnection.show_focus_highlight.
                 menu_button := UIconButton {
-                    icon: @image-url("images/menu-svgrepo-com.svg");
+                    icon: @image_url("images/menu-svgrepo-com.svg");
                     width: 50px;
                     clicked => {
-//                        debug("MainWindow.menu_button.height: " + self.height / 1px);
-//                        debug("MainWindow.icon-image.width: " + icon-image.width / 1px);
-//                        debug("MainWindow.icon-image.height: " + icon-image.height / 1px);
-//                        main_menu.show({
-//                            x: self.absolute-position.x,
-//                            y: self.absolute-position.y + self.height
-//                        })
+                        main_menu.show({
+                            x: self.absolute_position.x,
+                            y: self.absolute_position.y + self.height
+                        })
                     }
                 }
             }
         }
 	}
+
+    main_menu := PopupMenu {
+        items: [
+            { title: "Documentation..." },
+            { title: "About..." },
+            { title: "Colour Scheme..." },
+            { title: "Check for updates..." },
+        ];
+        item_activated(i) => {
+            if (i == 0) { root.open_documentation(); }
+            if (i == 1) { root.show_about_window(); }
+            if (i == 2) { root.show_colour_scheme_window(); }
+            if (i == 3) { root.check_for_updates(); }
+        }
+    }
 }

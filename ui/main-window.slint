@@ -144,7 +144,7 @@ export component MainWindow inherits Window {
                 // navigation.
                 // See also comment for MidiConnection.show_focus_highlight.
                 menu_button := UIconButton {
-                    icon: @image_url("images/menu-svgrepo-com.svg");
+                    icon: @image-url("images/menu-svgrepo-com.svg");
                     width: 50px;
                     clicked => {
                         main_menu.show({
@@ -158,6 +158,7 @@ export component MainWindow inherits Window {
 	}
 
     main_menu := PopupMenu {
+        background: Globals.window_background;
         items: [
             { title: "Documentation..." },
             { title: "About..." },

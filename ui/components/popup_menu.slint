@@ -1,11 +1,12 @@
+import { UAppTheme } from "@sleek-ui/app-theme.slint";
 import { UMenu, UMenuLink } from "@sleek-ui/widgets.slint";
-import { Globals } from "../globals.slint";
 
 export struct PopupMenuItemData {
     title: string,
 }
 
 export component PopupMenu {
+    in-out property<color> background: UAppTheme.bg-container;
     in property <[PopupMenuItemData]> items;
     callback item_activated(int);
 
@@ -56,7 +57,7 @@ export component PopupMenu {
         y: root.popup_y;
 
         UMenu {
-            background: Globals.window_background;
+            background: root.background;
             for item[i] in root.items: UMenuLink {
                 id: item.title.replace-all(" ", "-").to-lowercase();
                 name: item.title;

@@ -1,0 +1,120 @@
+import { UAppTheme } from "@sleek-ui/app-theme.slint";
+import { UText } from "@sleek-ui/widgets.slint";
+
+export struct ContextMenuLinkData {
+    title: string,
+}
+
+// A menu link item whose background colour indicates whether the item is
+// selected or otherwise hovered.
+component ContextMenuLink {
+    in property <string> title;
+    in property <bool> is_selected;
+    callback activated();
+
+    ta := TouchArea {
+        clicked => { root.activated(); }
+
+        Rectangle {
+            background: root.is_selected
+                ? UAppTheme.primary.selected
+                : (ta.has-hover ? UAppTheme.primary.hover : transparent);
+            border-radius: UAppTheme.radius-base;
+
+            HorizontalLayout { // Based on HorizontalLayout in UMenuLink
+                alignment: space-between;
+                padding: UAppTheme.padding-base;
+                padding-left: UAppTheme.padding-horizontal;
+                padding-right: UAppTheme.padding-horizontal;
+                link-text := UText {
+                    text: root.title;
+                    overflow: elide;
+                }
+            }
+        }
+    }
+}
+
+// A context menu that supports keyboard navigation.
+export component ContextMenu {
+    in property <[ContextMenuLinkData]> items;
+    callback item_activated(int);
+
+    private property <length> popup_x;
+    private property <length> popup_y;
+    private property <int> selected_index;
+    private property <bool> is_open;
+
+    // Implements keyboard navigation of the menu, using the Up Arrow, Down Arrow,
+    // Escape and Return keys.
+    // FocusScope lives outside the PopupWindow so focus() can be called on it.
+    // The `enabled` properety tracks `is_open`, so that when the menu closes,
+    // keyboard focus is released.
+    fs := FocusScope {
+        enabled: root.is_open;
+        key-pressed(event) => {
+            if (event.text == Key.UpArrow) {
+                if (root.selected_index <= 0) {
+                    root.selected_index = root.items.length - 1;
+                } else {
+                    root.selected_index = root.selected_index - 1;
+                }
+                return EventResult.accept;
+            }
+            if (event.text == Key.DownArrow) {
+                if (root.selected_index >= root.items.length - 1) {
+                    root.selected_index = 0;
+                } else {
+                    root.selected_index = root.selected_index + 1;
+                }
+                return EventResult.accept;
+            }
+            if (event.text == Key.Return) {
+                root.is_open = false;
+                root.item_activated(root.selected_index);
+                popup.close();
+                return EventResult.accept;
+            }
+            if (event.text == Key.Escape) {
+                root.is_open = false;
+                popup.close();
+                return EventResult.accept;
+            }
+            return EventResult.reject;
+        }
+    }
+
+    popup := PopupWindow {
+        x: root.popup_x;
+        y: root.popup_y;
+
+        Rectangle {
+            background: UAppTheme.primary.base;
+            clip: true;
+
+            VerticalLayout {
+
+                for item[i] in root.items: ContextMenuLink {
+                    title: item.title;
+                    is_selected: i == root.selected_index;
+                    activated => {
+                        root.is_open = false;
+                        root.item_activated(i);
+                        popup.close();
+                    }
+                }
+            }
+        }
+    }
+
+    // anchor is the screen-absolute position (e.g. self.absolute-position) at which
+    // the top-left of the popup should appear.
+    public function show(anchor: Point) {
+        root.popup_x = anchor.x - root.absolute-position.x;
+        root.popup_y = anchor.y - root.absolute-position.y;
+        root.selected_index = 0;
+        root.is_open = true;
+        popup.show();
+        fs.focus();
+    }
+}

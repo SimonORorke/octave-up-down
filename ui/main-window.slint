@@ -5,7 +5,7 @@ import { Globals, SlintMessageType } from "globals.slint";
 import { Alert } from "components/alert.slint";
 import { CcNoRange } from "components/cc.slint";
 import { MidiDevices, SlintDeviceType } from "components/midi-devices.slint";
-import { PopupMenu } from "components/popup_menu.slint";
+import { ContextMenu } from "components/context_menu.slint";
 
 export { SlintDeviceType }
 
@@ -134,15 +134,7 @@ export component MainWindow inherits Window {
                   padding_right: UAppTheme.padding_medium;
                   padding_top: UAppTheme.padding_medium;
                   padding_bottom: UAppTheme.padding_medium;
-                // If I tab through the main window to focus the menu button and then press
-                // Enter to open the menu, when I exit the menu, pressing enter again does not
-                // reopen the menu, even though the menu button is still focused.
-                // I need to tab away from the menu button and then tab back to it for Enter
-                // to work again. But this is almost certainly just normal behaviour for
-                // Slint buttons: Slint's internal focus state for the button's own FocusScope
-                // isn't properly re_activated by programmatic focus() calls, only by tab
-                // navigation.
-                // See also comment for MidiConnection.show_focus_highlight.
+                // See comment for MidiConnection.show_focus_highlight.
                 menu_button := UIconButton {
                     icon: @image-url("images/menu-svgrepo-com.svg");
                     width: 50px;
@@ -157,8 +149,7 @@ export component MainWindow inherits Window {
         }
 	}
 
-    main_menu := PopupMenu {
-        background: Globals.window_background;
+    main_menu := ContextMenu {
         items: [
             { title: "Documentation..." },
             { title: "About..." },

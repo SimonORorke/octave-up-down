@@ -159,7 +159,10 @@ export component MainWindow inherits Window {
         item_activated(i) => {
             if (i == 0) { root.open_documentation(); }
             if (i == 1) { root.show_about_window(); }
-            if (i == 2) { root.show_colour_scheme_window(); }
+            if (i == 2) {
+                root.show_colour_scheme_window();
+//                UAppTheme.dark.primary = UAppTheme.volcano; // It works!
+            }
             if (i == 3) { root.check_for_updates(); }
         }
     }

@@ -91,14 +91,21 @@ fn init_ui_handlers(main_window: &MainWindow,
                     presenter: SharedPresenter, ui_methods: Arc<UiMethods>,
                     // about_window: Rc<RefCell<Option<AboutWindow>>>
 ) {
-//     main_window.on_open_documentation(move || {
-//         open::that(DOCUMENTATION_LINK).unwrap();
-//     });
+    main_window.on_open_documentation(move || {
+        open::that(DOCUMENTATION_LINK).unwrap();
+    });
 //     {
 //         let about_window = Rc::clone(&about_window);
 //         let ui_methods_clone = ui_methods.clone();
 //         main_window.on_show_about_window(move || {
 //             show_about_window(about_window.clone(), ui_methods_clone.clone());
+//         });
+//     }
+//     {
+//         let colour_scheme_window = Rc::clone(&colour_scheme_window);
+//         let ui_methods_clone = ui_methods.clone();
+//         main_window.on_show_colour_scheme_window(move || {
+//             show_colour_scheme_window(colour_scheme_window.clone(), ui_methods_clone.clone());
 //         });
 //     }
     {
@@ -177,39 +184,6 @@ fn init_ui_handlers(main_window: &MainWindow,
         main_window.on_out_cc_no_changed(move |value| {
             spawn_presenter_action(
                 &presenter, move |c| c.set_out_cc_no(value as u8));
-        });
-    }
-    // Menu item callbacks
-    {
-        // let presenter: SharedPresenter = Arc::clone(&presenter);
-        main_window.on_check_for_updates(move || {
-            debug!("Checking for updates");
-            // spawn_presenter_action(
-            //     &presenter, move |c| c.set_out_cc_no(value as u8));
-        });
-    }
-    {
-        // let presenter: SharedPresenter = Arc::clone(&presenter);
-        main_window.on_open_documentation(move || {
-            debug!("Opening documentation");
-            // spawn_presenter_action(
-            //     &presenter, move |c| c.set_out_cc_no(value as u8));
-        });
-    }
-    {
-        // let presenter: SharedPresenter = Arc::clone(&presenter);
-        main_window.on_show_about_window(move || {
-            debug!("Showing About window");
-            // spawn_presenter_action(
-            //     &presenter, move |c| c.set_out_cc_no(value as u8));
-        });
-    }
-    {
-        // let presenter: SharedPresenter = Arc::clone(&presenter);
-        main_window.on_show_colour_scheme_window(move || {
-            debug!("Showing Colour Scheme window");
-            // spawn_presenter_action(
-            //     &presenter, move |c| c.set_out_cc_no(value as u8));
         });
     }
 }

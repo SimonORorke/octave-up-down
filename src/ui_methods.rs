@@ -2,13 +2,13 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use i_slint_backend_winit::WinitWindowAccessor;
 use log::trace;
-use slint::{ComponentHandle, PhysicalPosition, Weak};
+use slint::{ComponentHandle, PhysicalPosition, Weak, WindowPosition};
 #[cfg(target_os = "macos")]
 use slint::LogicalPosition;
 use app_info::APP_TITLE;
 use simonor::{DeviceType};
-use crate::{MainWindow, NewVersionCallbacks, OptionsModel, SlintMessageType, UiDeviceStrategy,
-            UOptionData};
+use crate::{CenteredDialog, MainWindow, NewVersionCallbacks, OptionsModel, SlintMessageType,
+            UiDeviceStrategy, UOptionData};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum MessageType {
@@ -70,6 +70,37 @@ pub struct UiMethods {
 impl UiMethods {
     pub fn new(main_window_weak: Weak<MainWindow>) -> Self {
         Self { main_window_weak }
+    }
+
+    /// Shows the dialog in the centre of the main window.
+    pub fn show_dialog_in_centre_of_main_window(&self, dialog: &impl CenteredDialog) {
+        // We have to show the dialog first before we can position it.
+        dialog.show().unwrap();
+        if let Some(main_window) = self.main_window_weak.upgrade() {
+            let scale_factor = main_window.window().scale_factor();
+
+            // Explicitly set the window size to the preferred dimensions if required
+            if dialog.should_force_size() {
+                let dw = (dialog.get_preferred_width() * scale_factor) as u32;
+                let dh = (dialog.get_preferred_height() * scale_factor) as u32;
+                dialog.window().set_size(slint::PhysicalSize::new(dw, dh));
+            }
+
+            // Calculate dimensions for centering
+            let dw_phys = (dialog.get_preferred_width() * scale_factor) as i32;
+            let dh_phys = (dialog.get_preferred_height() * scale_factor) as i32;
+            let ms = main_window.window().size(); // Physical
+            let mp = main_window.window().position();
+
+            // Parent dimensions are already physical
+            let pw_phys = ms.width as i32;
+            let ph_phys = ms.height as i32;
+
+            let x = mp.x + (pw_phys - dw_phys) / 2;
+            let y = mp.y + (ph_phys - dh_phys) / 2;
+
+            dialog.window().set_position(WindowPosition::Physical(PhysicalPosition { x, y }));
+        }
     }
 
     /// Provide the specified closure with a MainWindow instance without returning a result.

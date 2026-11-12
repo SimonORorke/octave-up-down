@@ -9,7 +9,7 @@ use log::{debug, trace};
 use slint::{CloseRequestResponse, ComponentHandle, Weak};
 use app_info::{APP_TITLE, COPYRIGHT, DOCUMENTATION_LINK, LICENSE, PROJECT_LINK, RELEASES_LINK,
                VERSION};
-use octave_up_down::{MainWindow, Presenter, SharedPresenter, SlintDeviceType,
+use octave_up_down::{AboutWindow, MainWindow, Presenter, SharedPresenter, SlintDeviceType,
                      UiDeviceStrategy, UiInputStrategy, UiMethods, UiOutputStrategy};
 
 fn main() -> Result<(), slint::PlatformError> {
@@ -30,11 +30,11 @@ fn main() -> Result<(), slint::PlatformError> {
                                 // new_version_window.as_weak()
         ));
     let presenter: SharedPresenter = Arc::new(Mutex::new(Presenter::new(ui_methods.clone())));
-    // let about_window: Rc<RefCell<Option<AboutWindow>>> = Rc::new(RefCell::new(None));
+    let about_window: Rc<RefCell<Option<AboutWindow>>> = Rc::new(RefCell::new(None));
     init_ui_handlers(&main_window,
                      // &new_version_window,
                      presenter.clone(), ui_methods.clone(),
-                     // about_window.clone()
+                     about_window.clone()
     );
     // Initialise presenter on a background thread so that UI callbacks within
     // init() can use invoke_from_event_loop without deadlocking.
@@ -89,18 +89,19 @@ extern "C" fn on_mac_app_will_terminate() {
 fn init_ui_handlers(main_window: &MainWindow,
                     // new_version_window: &NewVersionWindow,
                     presenter: SharedPresenter, ui_methods: Arc<UiMethods>,
-                    // about_window: Rc<RefCell<Option<AboutWindow>>>
+                    about_window: Rc<RefCell<Option<AboutWindow>>>,
+                    // colour_scheme_window: Rc<RefCell<Option<ColourSchemeWindow>>>,
 ) {
     main_window.on_open_documentation(move || {
         open::that(DOCUMENTATION_LINK).unwrap();
     });
-//     {
-//         let about_window = Rc::clone(&about_window);
-//         let ui_methods_clone = ui_methods.clone();
-//         main_window.on_show_about_window(move || {
-//             show_about_window(about_window.clone(), ui_methods_clone.clone());
-//         });
-//     }
+    {
+        let about_window = Rc::clone(&about_window);
+        let ui_methods_clone = ui_methods.clone();
+        main_window.on_show_about_window(move || {
+            show_about_window(about_window.clone(), ui_methods_clone.clone());
+        });
+    }
 //     {
 //         let colour_scheme_window = Rc::clone(&colour_scheme_window);
 //         let ui_methods_clone = ui_methods.clone();
@@ -111,12 +112,12 @@ fn init_ui_handlers(main_window: &MainWindow,
     {
         let presenter: SharedPresenter = Arc::clone(&presenter);
         let main_window_weak = main_window.as_weak();
-        // let about_window = Rc::clone(&about_window);
+        let about_window = Rc::clone(&about_window);
         // let new_version_window_weak = new_version_window.as_weak();
         main_window.window().on_close_requested(move || {
             // handle_close_request(&main_window_weak, &presenter, &about_window,
             //                      new_version_window_weak.clone())
-            handle_close_request(&main_window_weak, &presenter)
+            handle_close_request(&main_window_weak, &presenter, &about_window,)
         });
     }
     #[cfg(target_os = "macos")]
@@ -191,17 +192,17 @@ fn init_ui_handlers(main_window: &MainWindow,
 fn perform_close<'a>(
     main_window_weak: &'a Weak<MainWindow>,
     presenter: &'a SharedPresenter,
-    // about_window: &'a Rc<RefCell<Option<AboutWindow>>>,
+    about_window: &'a Rc<RefCell<Option<AboutWindow>>>,
     // new_version_window_weak: &'a Weak<NewVersionWindow>,
 ) -> Result<(), Box<dyn std::error::Error + 'a>> {
     if IS_CLOSED.swap(true, Ordering::SeqCst) {
         return Ok(());
     }
     trace!("main.perform_close");
-    // if let Some(dialog) = about_window.borrow().as_ref()
-    //     && ComponentHandle::window(dialog).is_visible() {
-    //     dialog.hide().ok();
-    // }
+    if let Some(dialog) = about_window.borrow().as_ref()
+        && ComponentHandle::window(dialog).is_visible() {
+        dialog.hide().ok();
+    }
     // if let Some(new_version_window) = new_version_window_weak.upgrade()
     //     && ComponentHandle::window(&new_version_window).is_visible() {
     //     new_version_window.hide().ok();
@@ -226,7 +227,7 @@ fn perform_close<'a>(
 }
 
 fn handle_close_request(main_window_weak: &Weak<MainWindow>, presenter: &SharedPresenter,
-                        // about_window: &Rc<RefCell<Option<AboutWindow>>>,
+                        about_window: &Rc<RefCell<Option<AboutWindow>>>,
                         // new_version_window_weak: Weak<NewVersionWindow>
 ) -> CloseRequestResponse {
     trace!("main.handle_close_request");
@@ -234,8 +235,8 @@ fn handle_close_request(main_window_weak: &Weak<MainWindow>, presenter: &SharedP
         // If a close error message is already shown, allow the window to be closed.
         return CloseRequestResponse::HideWindow;
     }
-    if perform_close(main_window_weak, presenter,
-                     // about_window, &new_version_window_weak
+    if perform_close(main_window_weak, presenter, about_window,
+                     // &new_version_window_weak
     ).is_err() {
         IS_CLOSE_ERROR_SHOWN.store(true, Ordering::Relaxed);
         IS_CLOSED.store(false, Ordering::SeqCst);
@@ -267,6 +268,32 @@ fn spawn_presenter_action(
         let mut guard = presenter.lock().unwrap();
         action(&mut guard);
     });
+}
+
+fn show_about_window(about_window: Rc<RefCell<Option<AboutWindow>>>, ui_methods: Arc<UiMethods>) {
+    let dialog = AboutWindow::new().unwrap();
+    dialog.set_window_title(format!("About {}", APP_TITLE).into());
+    dialog.set_app_title(APP_TITLE.into());
+    dialog.set_version(VERSION.into());
+    dialog.set_copyright(COPYRIGHT.into());
+    dialog.set_license(LICENSE.into());
+    dialog.set_project_link(PROJECT_LINK.into());
+    dialog.on_open_project_link(|| {
+        open::that(PROJECT_LINK).unwrap();
+    });
+    // Why is there a dialog.on_close_window before the dialog.show().unwrap()?
+    // The callback must be registered before show() to avoid a race condition:
+    // if the user somehow closed the window during or immediately after show() returned,
+    // the close handler needs to already be in place. More practically, it's just the
+    // conventional setup pattern — configure all properties and callbacks first,
+    // then show. In practice for a dialog like this it makes no functional difference,
+    // but registering handlers before showing is the safe, idiomatic order.
+    dialog.on_close_window({
+        let dialog_weak = dialog.as_weak();
+        move || { dialog_weak.unwrap().hide().unwrap(); }
+    });
+    ui_methods.show_dialog_in_centre_of_main_window(&dialog);
+    *about_window.borrow_mut() = Some(dialog);
 }
 
 static IS_CLOSED: AtomicBool = AtomicBool::new(false);

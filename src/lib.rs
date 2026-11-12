@@ -1,3 +1,4 @@
+pub mod centered_dialog;
 pub mod cc_no_ranges;
 pub mod midi_processor;
 pub mod presentation;
@@ -6,6 +7,7 @@ pub mod settings;
 pub mod ui_device_strategy;
 pub mod ui_methods;
 
+pub use centered_dialog::CenteredDialog;
 pub use cc_no_ranges::{CcNoRangeDefaults, CcNoRangeGetters, CcNoRangeSetters};
 pub use midi_processor::{IMidiProcessor, MidiProcessor, SharedMidiProcessor};
 pub use presenter::{NewVersionCallbacks, NewVersionCallbacksWrapper, OctaveShiftListener,

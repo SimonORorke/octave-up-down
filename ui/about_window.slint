@@ -1,0 +1,119 @@
+import { Palette, VerticalBox, } from "std-widgets.slint";
+import { UButton, UText, } from "@sleek-ui/widgets.slint";
+import { UAppTheme } from "@sleek-ui/app-theme.slint";
+import { UButtonVariant } from "@sleek-ui/common.slint";
+import { Globals } from "globals.slint";
+
+export component AboutWindow inherits Window {
+    init => {
+        Palette.color-scheme = ColorScheme.dark;
+        keyboard_shortcuts_scope.focus();
+    }
+    background: Globals.window_background;
+    title: window_title;
+    preferred-width: 795px;
+    preferred-height: 335px;
+    // This is a way to make a fixed-size window.
+    // But it does not stop the contents expanding and contracting
+    // when moved between screens of different resolutions.
+    //    min-width: 795px;
+    //    max-width: root.min-width;
+    //    min-height: 335px;
+    //    max-height: root.min-height;
+    icon: Globals.icon;
+
+    out property <length> preferred_w: root.preferred-width;
+    out property <length> preferred_h: root.preferred-height;
+
+    in property <string> window_title;
+    in property <string> app_title;
+    in property <string> version;
+    in property <string> copyright;
+    in property <string> license;
+    in property <string> project_link;
+
+    callback open_project_link();
+    callback close_window();
+
+    keyboard_shortcuts_scope := FocusScope {
+        key-pressed(event) => {
+            // Close window keyboard shortcuts
+            if (event.text == Key.Escape || event.text == Key.Return) {
+                root.close_window();
+                return EventResult.accept;
+            }
+            EventResult.reject
+        }
+
+        VerticalLayout {
+            padding: UAppTheme.padding-bigger;
+            spacing: UAppTheme.padding-medium;
+
+            HorizontalLayout {
+                spacing: 10px;
+
+                Image {
+                    source: Globals.icon;
+                    width: 260px;
+                    height: 260px;
+                    image-fit: contain;
+                }
+
+                VerticalLayout {
+                    alignment: center;
+
+                    VerticalBox {
+                        UText {
+                            text: root.app_title;
+                            font-size: 32px;
+                            horizontal_alignment: left;
+                        }
+                    }
+
+                    VerticalBox {
+                        UText {
+                            text: "Version " + root.version;
+                            horizontal_alignment: left;
+                        }
+                    }
+
+                    VerticalBox {
+                        UText {
+                            text: root.copyright;
+                            horizontal_alignment: left;
+                        }
+                    }
+
+                    TouchArea {
+                        mouse-cursor: pointer;
+                        clicked => { root.open_project_link(); }
+
+                        VerticalBox {
+                            UText {
+                                text: root.project_link;
+                                horizontal_alignment: left;
+                            }
+                        }
+                    }
+
+                    VerticalBox {
+                        UText {
+                            text: "Licence: " + root.license;
+                            horizontal_alignment: left;
+                        }
+                    }
+                }
+            }
+
+            HorizontalLayout {
+                alignment: end;
+
+                UButton {
+                    text: "Close";
+                    variant: UButtonVariant.primary;
+                    clicked => { root.close_window(); }
+                }
+            }
+        }
+    }
+}

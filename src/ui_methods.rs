@@ -7,8 +7,8 @@ use slint::{ComponentHandle, PhysicalPosition, Weak, WindowPosition};
 use slint::LogicalPosition;
 use app_info::APP_TITLE;
 use simonor::{DeviceType};
-use crate::{CenteredDialog, MainWindow, NewVersionCallbacks, OptionsModel, SlintMessageType,
-            UiDeviceStrategy, UOptionData};
+use crate::{CenteredDialog, MainWindow, NewVersionCallbacks, NewVersionWindow, OptionsModel,
+            SlintMessageType, UiDeviceStrategy, UOptionData};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum MessageType {
@@ -65,11 +65,13 @@ pub trait IUiMethods: Send + Sync {
 #[derive(Clone)]
 pub struct UiMethods {
     main_window_weak: Weak<MainWindow>,
+    new_version_window_weak: Weak<NewVersionWindow>,
 }
 
 impl UiMethods {
-    pub fn new(main_window_weak: Weak<MainWindow>) -> Self {
-        Self { main_window_weak }
+    pub fn new(main_window_weak: Weak<MainWindow>,
+               new_version_window_weak: Weak<NewVersionWindow>) -> Self {
+        Self { main_window_weak, new_version_window_weak }
     }
 
     /// Shows the dialog in the centre of the main window.
@@ -230,33 +232,33 @@ impl IUiMethods for UiMethods {
 
     fn show_new_version_window(&self, new_version: &str, auto_check_new_versions: bool,
                                callbacks: Arc<Mutex<dyn NewVersionCallbacks>>) {
-        // let new_version_string = new_version.to_string();
-        // let new_version_window_weak = self.new_version_window_weak.clone();
-        // let self_clone = self.clone();
-        // self.with_ui_thread(move || {
-        //     let dialog_borrow = new_version_window_weak.upgrade().unwrap();
-        //     // Re-setup callbacks each time as the window might be reused
-        //     dialog_borrow.set_auto_check_new_versions(auto_check_new_versions);
-        //     dialog_borrow.set_message(
-        //         format!("Version {} of {} is available.", new_version_string, APP_TITLE).into());
-        //
-        //     let callbacks_clone_1 = callbacks.clone();
-        //     dialog_borrow.on_auto_check_new_versions_changed(move |auto_check_new_versions: bool| {
-        //         callbacks_clone_1.lock().unwrap().on_auto_check_new_versions_changed(
-        //             auto_check_new_versions);
-        //     });
-        //     let callbacks_clone_2 = callbacks.clone();
-        //     dialog_borrow.on_ignore_this_version(move || {
-        //         callbacks_clone_2.lock().unwrap().on_ignore_this_version(
-        //             new_version_string.clone());
-        //     });
-        //     dialog_borrow.on_close_window({
-        //         let dialog_weak = dialog_borrow.as_weak();
-        //         move || { dialog_weak.unwrap().hide().unwrap(); }
-        //     });
-        //
-        //     self_clone.show_dialog_in_centre_of_main_window(&dialog_borrow);
-        // });
+        let new_version_string = new_version.to_string();
+        let new_version_window_weak = self.new_version_window_weak.clone();
+        let self_clone = self.clone();
+        self.with_ui_thread(move || {
+            let dialog_borrow = new_version_window_weak.upgrade().unwrap();
+            // Re-setup callbacks each time as the window might be reused
+            dialog_borrow.set_auto_check_new_versions(auto_check_new_versions);
+            dialog_borrow.set_message(
+                format!("Version {} of {} is available.", new_version_string, APP_TITLE).into());
+
+            let callbacks_clone_1 = callbacks.clone();
+            dialog_borrow.on_auto_check_new_versions_changed(move |auto_check_new_versions: bool| {
+                callbacks_clone_1.lock().unwrap().on_auto_check_new_versions_changed(
+                    auto_check_new_versions);
+            });
+            let callbacks_clone_2 = callbacks.clone();
+            dialog_borrow.on_ignore_this_version(move || {
+                callbacks_clone_2.lock().unwrap().on_ignore_this_version(
+                    new_version_string.clone());
+            });
+            dialog_borrow.on_close_window({
+                let dialog_weak = dialog_borrow.as_weak();
+                move || { dialog_weak.unwrap().hide().unwrap(); }
+            });
+
+            self_clone.show_dialog_in_centre_of_main_window(&dialog_borrow);
+        });
     }
 
     fn set_main_window_position(&self, x: i32, y: i32) {

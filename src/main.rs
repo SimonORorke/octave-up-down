@@ -9,7 +9,8 @@ use log::{debug, trace};
 use slint::{CloseRequestResponse, ComponentHandle, Weak};
 use app_info::{APP_TITLE, COPYRIGHT, DOCUMENTATION_LINK, LICENSE, PROJECT_LINK, RELEASES_LINK,
                VERSION};
-use octave_up_down::{AboutWindow, MainWindow, Presenter, SharedPresenter, SlintDeviceType,
+use octave_up_down::{AboutWindow, MainWindow, NewVersionWindow, Presenter, SharedPresenter,
+                     SlintDeviceType,
                      UiDeviceStrategy, UiInputStrategy, UiMethods, UiOutputStrategy};
 
 fn main() -> Result<(), slint::PlatformError> {
@@ -24,15 +25,15 @@ fn main() -> Result<(), slint::PlatformError> {
     install_solid_title_bar_platform();
     let main_window = MainWindow::new()?;
     main_window.set_window_title(APP_TITLE.into());
-    // let new_version_window = create_new_version_window();
+    let new_version_window = create_new_version_window();
     let ui_methods =
         Arc::new(UiMethods::new(main_window.as_weak(),
-                                // new_version_window.as_weak()
+                                new_version_window.as_weak()
         ));
     let presenter: SharedPresenter = Arc::new(Mutex::new(Presenter::new(ui_methods.clone())));
     let about_window: Rc<RefCell<Option<AboutWindow>>> = Rc::new(RefCell::new(None));
     init_ui_handlers(&main_window,
-                     // &new_version_window,
+                     &new_version_window,
                      presenter.clone(), ui_methods.clone(),
                      about_window.clone()
     );
@@ -87,7 +88,7 @@ extern "C" fn on_mac_app_will_terminate() {
 }
 
 fn init_ui_handlers(main_window: &MainWindow,
-                    // new_version_window: &NewVersionWindow,
+                    new_version_window: &NewVersionWindow,
                     presenter: SharedPresenter, ui_methods: Arc<UiMethods>,
                     about_window: Rc<RefCell<Option<AboutWindow>>>,
                     // colour_scheme_window: Rc<RefCell<Option<ColourSchemeWindow>>>,
@@ -113,11 +114,10 @@ fn init_ui_handlers(main_window: &MainWindow,
         let presenter: SharedPresenter = Arc::clone(&presenter);
         let main_window_weak = main_window.as_weak();
         let about_window = Rc::clone(&about_window);
-        // let new_version_window_weak = new_version_window.as_weak();
+        let new_version_window_weak = new_version_window.as_weak();
         main_window.window().on_close_requested(move || {
-            // handle_close_request(&main_window_weak, &presenter, &about_window,
-            //                      new_version_window_weak.clone())
-            handle_close_request(&main_window_weak, &presenter, &about_window,)
+            handle_close_request(&main_window_weak, &presenter, &about_window,
+                                 new_version_window_weak.clone())
         });
     }
     #[cfg(target_os = "macos")]
@@ -138,12 +138,12 @@ fn init_ui_handlers(main_window: &MainWindow,
     }
     // All Presenter methods must be called from non-UI threads to avoid deadlock.
     // See the UiMethods.with_main_window_result doc comment for more information.
-    // {
-    //     let presenter: SharedPresenter = Arc::clone(&presenter);
-    //     main_window.on_check_for_updates(move || {
-    //         spawn_presenter_action(&presenter, move |c| c.check_for_updates());
-    //     });
-    // }
+    {
+        let presenter: SharedPresenter = Arc::clone(&presenter);
+        main_window.on_check_for_updates(move || {
+            spawn_presenter_action(&presenter, move |c| c.check_for_updates());
+        });
+    }
     {
         let presenter: SharedPresenter = Arc::clone(&presenter);
         main_window.on_connect_device(move |device_type: SlintDeviceType| {
@@ -193,7 +193,7 @@ fn perform_close<'a>(
     main_window_weak: &'a Weak<MainWindow>,
     presenter: &'a SharedPresenter,
     about_window: &'a Rc<RefCell<Option<AboutWindow>>>,
-    // new_version_window_weak: &'a Weak<NewVersionWindow>,
+    new_version_window_weak: &'a Weak<NewVersionWindow>,
 ) -> Result<(), Box<dyn std::error::Error + 'a>> {
     if IS_CLOSED.swap(true, Ordering::SeqCst) {
         return Ok(());
@@ -203,10 +203,10 @@ fn perform_close<'a>(
         && ComponentHandle::window(dialog).is_visible() {
         dialog.hide().ok();
     }
-    // if let Some(new_version_window) = new_version_window_weak.upgrade()
-    //     && ComponentHandle::window(&new_version_window).is_visible() {
-    //     new_version_window.hide().ok();
-    // }
+    if let Some(new_version_window) = new_version_window_weak.upgrade()
+        && ComponentHandle::window(&new_version_window).is_visible() {
+        new_version_window.hide().ok();
+    }
     let (x, y) = if let Some(main_window) = main_window_weak.upgrade() {
         let pos = main_window.window().position();
         #[cfg(target_os = "macos")]
@@ -228,7 +228,7 @@ fn perform_close<'a>(
 
 fn handle_close_request(main_window_weak: &Weak<MainWindow>, presenter: &SharedPresenter,
                         about_window: &Rc<RefCell<Option<AboutWindow>>>,
-                        // new_version_window_weak: Weak<NewVersionWindow>
+                        new_version_window_weak: Weak<NewVersionWindow>
 ) -> CloseRequestResponse {
     trace!("main.handle_close_request");
     if IS_CLOSE_ERROR_SHOWN.load(Ordering::Relaxed) {
@@ -236,7 +236,7 @@ fn handle_close_request(main_window_weak: &Weak<MainWindow>, presenter: &SharedP
         return CloseRequestResponse::HideWindow;
     }
     if perform_close(main_window_weak, presenter, about_window,
-                     // &new_version_window_weak
+                     &new_version_window_weak
     ).is_err() {
         IS_CLOSE_ERROR_SHOWN.store(true, Ordering::Relaxed);
         IS_CLOSED.store(false, Ordering::SeqCst);
@@ -251,6 +251,20 @@ fn create_device_strategy(device_type: SlintDeviceType)
         SlintDeviceType::Input => UiInputStrategy::new().clone_box(),
         SlintDeviceType::Output => UiOutputStrategy::new().clone_box(),
     }
+}
+
+fn create_new_version_window() -> NewVersionWindow  {
+    let new_version_window = NewVersionWindow::new().unwrap();
+    new_version_window.set_window_title(format!("{} - New Version Available", APP_TITLE).into());
+    new_version_window.set_releases_link(RELEASES_LINK.into());
+    new_version_window.on_open_releases_link(|| {
+        open::that(RELEASES_LINK).unwrap();
+    });
+    new_version_window.on_close_window({
+        let dialog_weak = new_version_window.as_weak();
+        move || { dialog_weak.unwrap().hide().unwrap(); }
+    });
+    new_version_window
 }
 
 /// Runs `action` against the `Presenter` on a rayon worker thread.

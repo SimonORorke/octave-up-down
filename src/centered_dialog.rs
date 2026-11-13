@@ -1,6 +1,6 @@
 use slint::{ComponentHandle, PlatformError};
 // use crate::{AboutWindow, ColourSchemeWindow, NewVersionWindow};
-use crate::{AboutWindow, };
+use crate::{AboutWindow, NewVersionWindow};
 
 /// A dialog box that is to be shown centred over the main window.
 pub trait CenteredDialog {
@@ -12,6 +12,24 @@ pub trait CenteredDialog {
 }
 
 impl CenteredDialog for AboutWindow {
+    fn show(&self) -> Result<(), PlatformError> {
+        ComponentHandle::show(self)
+    }
+    fn window(&self) -> &slint::Window {
+        ComponentHandle::window(self)
+    }
+    fn get_preferred_width(&self) -> f32 {
+        self.get_preferred_w()
+    }
+    fn get_preferred_height(&self) -> f32 {
+        self.get_preferred_h()
+    }
+    fn should_force_size(&self) -> bool {
+        false
+    }
+}
+
+impl CenteredDialog for NewVersionWindow {
     fn show(&self) -> Result<(), PlatformError> {
         ComponentHandle::show(self)
     }

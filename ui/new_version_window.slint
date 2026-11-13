@@ -1,0 +1,103 @@
+import { VerticalBox, } from "std-widgets.slint";
+import { UAppTheme } from "@sleek-ui/app-theme.slint";
+import { UButtonVariant } from "@sleek-ui/common.slint";
+import { UButton, USwitch, UText, } from "@sleek-ui/widgets.slint";
+import { NiceWindow } from "components/nice_window.slint";
+
+export component NewVersionWindow inherits NiceWindow {
+    init => {
+        self.nice_init();
+        keyboard_shortcuts_scope.focus();
+    }
+    title: window_title;
+    preferred-width: 480px;
+    preferred-height: 255px;
+
+    in property <bool> auto_check_new_versions;
+    in property <string> message;
+    in property <string> releases_link;
+    in property <string> window_title;
+
+    out property <length> preferred_w: root.preferred-width;
+    out property <length> preferred_h: root.preferred-height;
+
+    callback auto_check_new_versions_changed(auto_check_new_versions: bool);
+    callback ignore_this_version();
+    callback open_releases_link();
+    callback close_window();
+
+    keyboard_shortcuts_scope := FocusScope {
+        key-pressed(event) => {
+            // Close window keyboard shortcuts
+            if (event.text == Key.Escape) { // Return key is used by other controls
+                root.close_window();
+                return EventResult.accept;
+            }
+            EventResult.reject
+        }
+
+        VerticalLayout {
+            alignment: start; // Stops spreading out when window lenghthened.
+            padding: UAppTheme.padding-medium;
+            spacing: UAppTheme.spacing-medium;
+
+            message_line := HorizontalLayout {
+                message_box := VerticalBox {
+                    UText {
+                        text: root.message;
+                        horizontal_alignment: left;
+                    }
+                }
+            }
+
+            button_line_1 := HorizontalLayout {
+                alignment: space-between;
+                open_release_button := UButton {
+                    text: "Open Releases Page";
+                    width: 190px;
+                    variant: UButtonVariant.primary;
+                    clicked => { root.open_releases_link(); }
+                }
+            }
+
+            option_line1 := HorizontalLayout {
+                padding-top: UAppTheme.padding-medium;
+                auto_check_new_versions_switch := USwitch {
+                    checked: root.auto_check_new_versions;
+                    clicked => {
+                        root.auto_check_new_versions_changed(self.checked);
+                    }
+                }
+                UText {
+                    text: "Automatically check for new versions";
+                    horizontal_alignment: left;
+                }
+            }
+
+            option_line2 := HorizontalLayout {
+                padding-top: UAppTheme.padding-medium;
+                ignore_version_switch := USwitch {
+                    checked: false;
+                    clicked => {
+                        if self.checked {
+                            root.ignore_this_version();
+                        }
+                    }
+                }
+                UText {
+                    text: "Ignore this version";
+                    horizontal_alignment: left;
+                }
+            }
+
+            buttons_line_2 := HorizontalLayout {
+                alignment: space-between;
+                padding-top: UAppTheme.padding-medium;
+                close_button := UButton {
+                    text: "Close";
+                    clicked => { root.close_window(); }
+                }
+            }
+        }
+    }
+}

@@ -1,43 +1,21 @@
-import { Palette, VerticalBox, } from "std-widgets.slint";
+import { VerticalBox, } from "std-widgets.slint";
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
 import { UIconButton, } from "@sleek-ui/widgets.slint";
 import { Globals, SlintMessageType } from "globals.slint";
 import { Alert } from "components/alert.slint";
+import { ContextMenu } from "components/context_menu.slint";
 import { CcNoRange } from "components/cc.slint";
 import { MidiDevices, SlintDeviceType } from "components/midi-devices.slint";
-import { ContextMenu } from "components/context_menu.slint";
+import { NiceWindow } from "components/nice_window.slint";
 
 export { AboutWindow } from "about_window.slint";
 export { SlintDeviceType }
 
 // As of Slint 18.1 and sleek-ui 1.6.0, Show Preview does not work.
-export component MainWindow inherits Window {
-    init => {
-        Palette.color-scheme = ColorScheme.dark;
-//        debug("MainWindow.init:  UAppTheme.dark.font-size-base = " + (UAppTheme.dark.font-size-base / 1px));
-        UAppTheme.dark.font-size-base = 17px; // Default 14
-        UAppTheme.dark.font-size-medium = 19px; // Default 16
-        UAppTheme.dark.font-size-big = 21px; // Default 18
-        UAppTheme.dark.font-size-bigger = 23px; // Default 20
-        UAppTheme.dark.radius-base = 20px;
-//        UAppTheme.dark.primary = UAppTheme.calendula-gold;
-//        UAppTheme.dark.primary = UAppTheme.cyan;
-//        UAppTheme.dark.primary = UAppTheme.daybreak-blue;
-//        UAppTheme.dark.primary = UAppTheme.dust-red;
-        UAppTheme.dark.primary = UAppTheme.french-magenta;
-//        UAppTheme.dark.primary = UAppTheme.geek-blue;
-//        UAppTheme.dark.primary = UAppTheme.golden-purple;
-//        UAppTheme.dark.primary = UAppTheme.lime;
-//        UAppTheme.dark.primary = UAppTheme.polar-green;
-//        UAppTheme.dark.primary = UAppTheme.sunrise-yellow;
-//        UAppTheme.dark.primary = UAppTheme.sunset-orange;
-//        UAppTheme.dark.primary = UAppTheme.volcano;
-    }
-    background: Globals.window_background;
+export component MainWindow inherits NiceWindow {
     min-width: 700px;
     preferred-height: 325px; // Min height expands automatically so everything fits;
     title: window_title;
-    icon: Globals.icon;
 
     in property <string> window_title;
     in property <int> down_cc_no;

@@ -1,7 +1,8 @@
-import { UCard, UText, } from "@sleek-ui/widgets.slint";
+import { UText, } from "@sleek-ui/widgets.slint";
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
-import { MidiConnection } from "midi-connection.slint";
 import { SlintMessageType } from "../globals.slint";
+import { MidiConnection } from "midi-connection.slint";
+import { NiceCard } from "nice_card.slint";
 
 export enum SlintDeviceType {
     input,
@@ -34,8 +35,7 @@ export component MidiDevices inherits VerticalLayout {
         output-connection.show-connected-device-name(name, message-type);
     }
 
-    UCard {
-        background: UAppTheme.primary.selected; // Darkest
+    NiceCard {
         width: 686px;
 
         VerticalLayout {

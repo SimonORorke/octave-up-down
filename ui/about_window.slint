@@ -1,15 +1,15 @@
-import { Palette, VerticalBox, } from "std-widgets.slint";
+import { VerticalBox, } from "std-widgets.slint";
 import { UButton, UText, } from "@sleek-ui/widgets.slint";
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
 import { UButtonVariant } from "@sleek-ui/common.slint";
 import { Globals } from "globals.slint";
+import { NiceWindow } from "components/nice_window.slint";
 
-export component AboutWindow inherits Window {
+export component AboutWindow inherits NiceWindow {
     init => {
-        Palette.color-scheme = ColorScheme.dark;
+        self.nice_init();
         keyboard_shortcuts_scope.focus();
     }
-    background: Globals.window_background;
     title: window_title;
     preferred-width: 795px;
     preferred-height: 335px;
@@ -20,7 +20,6 @@ export component AboutWindow inherits Window {
     //    max-width: root.min-width;
     //    min-height: 335px;
     //    max-height: root.min-height;
-    icon: Globals.icon;
 
     out property <length> preferred_w: root.preferred-width;
     out property <length> preferred_h: root.preferred-height;

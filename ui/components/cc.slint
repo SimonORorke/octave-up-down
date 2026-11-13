@@ -1,5 +1,6 @@
 import { UAppTheme } from "@sleek-ui/app-theme.slint";
-import { UCard, UInputNumber, UText } from "@sleek-ui/widgets.slint";
+import { UInputNumber, UText } from "@sleek-ui/widgets.slint";
+import { NiceCard } from "nice_card.slint";
 
 export component CcNoInput inherits HorizontalLayout {
     in property <string> title;
@@ -53,8 +54,7 @@ export component CcNoRange inherits HorizontalLayout {
     in property <int> to-cc-no;
     callback to-cc-no-changed(value: int);
 
-    UCard {
-        background: UAppTheme.primary.selected; // Darkest
+    NiceCard {
         width: 686px;
 
         HorizontalLayout {
